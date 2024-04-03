@@ -67,6 +67,7 @@
   "types": "./dist/index.d.ts",
   "type": "module",
   "dependencies": {
-    "@ourway/svelte-firebase-auth": "^0.0.1"
+    "@ourway/svelte-firebase-auth": "^0.0.4",
+    "@ourway/svelte-redux": "^0.0.1"
   }
 }
