@@ -1,2 +1,19 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<script lang="ts">
+import { firebaseConfig } from "$lib/firebase";
+import { initializeApp } from "@firebase/app";
+import { GoogleAuthProvider, getAuth } from "@firebase/auth";
+import { Signin } from "@ourway/svelte-firebase-auth";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+console.log("AUTH: ", auth);
+const googleAuthProvider = new GoogleAuthProvider();
+
+function user(e: CustomEvent) {
+  console.log("CUSTOM EVENT: ", e);
+}
+</script>
+
+<h1>Cluster</h1>
+<p>Please sign in.</p>
+<Signin {auth} {googleAuthProvider} on:user_changed={user}/>
