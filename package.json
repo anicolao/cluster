@@ -1,21 +1,23 @@
 {
-  "name": "@ourway/firebase-template",
+  "name": "Cluster",
   "version": "0.0.1",
-  "description": "A template for making sveltekit/firebase projects.",
-  "author": "Alex Nicolaou",
+  "description": "A slow real time space conquest game.",
+  "author": "Andrew Blackledge, Alex Nicolaou",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/anicolao/firebase-template.git"
+    "url": "git+ssh://git@github.com/anicolao/cluster.git"
   },
   "keywords": [
-    "firebase",
-    "svelte"
+    "game",
+    "svelte",
+    "threlte",
+    "web"
   ],
-  "license": "MIT",
+  "license": "GPLv3",
   "bugs": {
-    "url": "https://github.com/anicolao/firebase-template/issues"
+    "url": "https://github.com/anicolao/cluster/issues"
   },
-  "homepage": "https://github.com/anicolao/firebase-template#readme",
+  "homepage": "https://github.com/anicolao/cluster#readme",
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
