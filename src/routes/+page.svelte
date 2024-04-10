@@ -1,12 +1,12 @@
 <script lang="ts">
-import { firebaseConfig } from "$lib/firebase";
+import { app, firestore } from "$lib/firebase";
 import { store } from "$lib/store";
 import { login, logout } from "$lib/users";
 import { initializeApp } from "@firebase/app";
 import { GoogleAuthProvider, getAuth } from "@firebase/auth";
+import { doc, setDoc } from "@firebase/firestore";
 import { Signin } from "@ourway/svelte-firebase-auth";
 
-const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 // console.log("AUTH: ", auth);
 const googleAuthProvider = new GoogleAuthProvider();
@@ -17,6 +17,8 @@ function user(e: CustomEvent) {
   if (e.detail.signedIn) {
     store.dispatch(login(e.detail));
     uid = e.detail.uid;
+    const userRecord = doc(firestore, `/users/${uid}`);
+    setDoc(userRecord, e.detail);
   } else {
     if (uid) {
       store.dispatch(logout(uid));
