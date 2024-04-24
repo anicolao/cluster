@@ -2,6 +2,7 @@
 import { app, firestore } from "$lib/firebase";
 import { store } from "$lib/store";
 import { login, logout } from "$lib/users";
+import { getVersion } from "$lib/version";
 import { initializeApp } from "@firebase/app";
 import { GoogleAuthProvider, getAuth } from "@firebase/auth";
 import { doc, setDoc } from "@firebase/firestore";
@@ -32,3 +33,4 @@ function user(e: CustomEvent) {
 <h1>Cluster</h1>
 <p>Please sign in.</p>
 <Signin {auth} {googleAuthProvider} on:user_changed={user}/>
+<p>Version {getVersion()}</p>
