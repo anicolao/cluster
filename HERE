@@ -1,0 +1,7 @@
+Try to install adapter-node, but that created a conflict with other older packages.
+
+So update _all_ packages, which is potentially a problem.  Now we can't
+  npm run build
+
+because we think svelte-kit isn't configured properly (although it looks like
+it is).  But perhaps it's a different problem.

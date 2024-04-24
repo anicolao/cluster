@@ -8,7 +8,7 @@ import { doc, setDoc } from "@firebase/firestore";
 import { Signin } from "@ourway/svelte-firebase-auth";
 
 const auth = getAuth(app);
-// console.log("AUTH: ", auth);
+console.log("AUTH: ", auth);
 const googleAuthProvider = new GoogleAuthProvider();
 
 let uid: string | undefined = undefined;
