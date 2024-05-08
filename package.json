@@ -47,9 +47,6 @@
     "!dist/**/*.test.*",
     "!dist/**/*.spec.*"
   ],
-  "peerDependencies": {
-    "svelte": "^4.0.0"
-  },
   "devDependencies": {
     "@biomejs/biome": "^1.7.1",
     "@sveltejs/adapter-static": "^3.0.1",
