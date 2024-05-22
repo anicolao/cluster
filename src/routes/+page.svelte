@@ -31,6 +31,7 @@ function user(e: CustomEvent) {
 </script>
 
 <h1>Cluster</h1>
+<p>Retest!</p>
 <p>Please sign in.</p>
 <Signin {auth} {googleAuthProvider} on:user_changed={user}/>
 <p>Version {getVersion()}</p>
