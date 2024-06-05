@@ -10,7 +10,7 @@ export const auth = getAuth(app);
 export const googleAuthProvider = new GoogleAuthProvider();
 
 let uid: string | undefined = undefined;
-export const signedIn = writable(false);
+export const signedIn = writable<boolean | undefined>(undefined);
 
 export function user(e: CustomEvent) {
   console.log("auth.ts: CUSTOM EVENT: ", e);
