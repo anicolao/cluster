@@ -9,7 +9,7 @@ export const auth = getAuth(app);
 // console.log("AUTH: ", auth);
 export const googleAuthProvider = new GoogleAuthProvider();
 
-let uid: string | undefined = undefined;
+export let uid: string | undefined = undefined;
 export const signedIn = writable<boolean | undefined>(undefined);
 
 export function user(e: CustomEvent) {
