@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "@firebase/app";
-import { getDatabase } from "@firebase/database";
-import { getFirestore } from "@firebase/firestore";
+import { connectDatabaseEmulator, getDatabase } from "@firebase/database";
+import { connectFirestoreEmulator, getFirestore } from "@firebase/firestore";
 //import { getAnalytics } from "firebase/analytics";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -24,3 +24,9 @@ export const app = initializeApp(firebaseConfig);
 export const firestore = getFirestore();
 export const realtimeDB = getDatabase(app);
 //const analytics = getAnalytics(app);
+
+if (!import.meta.env.PROD) {
+  // Use local emulators.
+  connectFirestoreEmulator(firestore, "localhost", 8080);
+  connectDatabaseEmulator(realtimeDB, "localhost", 9000);
+}
