@@ -1,7 +1,7 @@
 <script lang="ts">
 import { uid } from "$lib/auth";
 import { firestore, realtimeDB } from "$lib/firebase";
-import { child, push, ref } from "@firebase/database";
+import { push, ref } from "@firebase/database";
 import {
   type Unsubscribe,
   collection,
@@ -19,10 +19,7 @@ let writeTimeout = 0;
 
 function writeName() {
   console.log(`Write the user's name now: [${alias}]`);
-  const newAction = push(child(ref(realtimeDB), `users/${uid}/profile`), {
-    type: "set_alias",
-    alias,
-  }).key;
+  push(ref(realtimeDB, `users/${uid}/profile`), { type: "set_alias", alias });
 }
 
 function setNameTimeout() {
@@ -45,15 +42,14 @@ let users: { [k: string]: { alias: string } } = {};
 function subscribeToProfilesCollection() {
   const profiles = collection(firestore, "profiles");
   unsubscribeProfiles = onSnapshot(query(profiles), (querySnapshot) => {
-    // biome-ignore lint/complexity/noForEach: <explanation>
-    querySnapshot.docChanges().forEach((change) => {
+    for (const change of querySnapshot.docChanges()) {
       const doc = change.doc;
       console.log(doc.data());
       console.log(doc.ref.id);
       users[doc.ref.id] = change.doc.data() as { alias: string };
-      // biome-ignore lint/correctness/noSelfAssign: <explanation>
+      // biome-ignore lint/correctness/noSelfAssign: necessary for svelte to react
       users = users;
-    });
+    }
   });
 }
 
