@@ -1,4 +1,5 @@
 <script lang="ts">
+import type { ProfileAction } from "$common/profiles";
 import { uid } from "$lib/auth";
 import { firestore, realtimeDB } from "$lib/firebase";
 import { push, ref } from "@firebase/database";
@@ -17,9 +18,13 @@ alias = "";
 const WRITE_DELAY = 500;
 let writeTimeout = 0;
 
+function pushAction(action: ProfileAction) {
+  push(ref(realtimeDB, `users/${uid}/profile`), action);
+}
+
 function writeName() {
   console.log(`Write the user's name now: [${alias}]`);
-  push(ref(realtimeDB, `users/${uid}/profile`), { type: "set_alias", alias });
+  pushAction({ type: "set_alias", alias });
 }
 
 function setNameTimeout() {
@@ -94,10 +99,7 @@ function chooseProfile(i: number) {
   return () => {
     profileSelection = i;
     toggleDropdown();
-    push(ref(realtimeDB, `users/${uid}/profile`), {
-      type: "set_avatar",
-      profile_image: profileImages[i],
-    });
+    pushAction({ type: "set_avatar", profile_image: profileImages[i] });
   };
 }
 </script>

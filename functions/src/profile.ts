@@ -1,11 +1,6 @@
 import * as admin from "firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
-
-export interface ProfileAction {
-  type: string;
-  alias?: string;
-  profile_image?: string;
-}
+import type { ProfileAction } from "$common/profiles";
 
 export interface Profile {
   alias?: string;
