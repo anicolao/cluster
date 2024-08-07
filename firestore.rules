@@ -13,5 +13,9 @@ service cloud.firestore {
     match /profiles/{document=**} {
       allow read: if request.auth != null;
     }
+
+    match /games/{document=**} {
+      allow read: if request.auth != null;
+    }
   }
 }
