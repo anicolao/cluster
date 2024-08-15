@@ -25,7 +25,7 @@ export async function processProfileAction(
   }
   const profileSnapshot = await db.doc(path).get();
   if (profileSnapshot.exists) {
-    return db.doc(path).update(profile);
+    return db.doc(path).update({ ...profile });
   }
   return db.doc(path).set(profile);
 }

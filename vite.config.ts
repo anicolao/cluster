@@ -6,7 +6,6 @@ export default defineConfig({
   plugins: [
     sveltekit(),
     execute({ commands: ["./bin/version"], hook: "buildStart" }),
-    execute({ commands: ["./bin/version"], hook: "handleHotUpdate" }),
   ],
   test: {
     include: ["tests/**/*.{test,spec}.{js,ts}"],
