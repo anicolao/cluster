@@ -15,7 +15,7 @@ export interface GameState {
   tick: number;
   started: boolean;
   completed: boolean;
-  players: PlayerInfo[];
+  players: { [k: string]: PlayerInfo };
   options: GameOptions;
 }
 

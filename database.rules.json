@@ -1,11 +1,19 @@
 {
   "rules": {
+    "games": {
+      "$gameid": {
+        "$uid": {
+          ".write": "$uid === auth.uid"
+        }
+      }
+    },
     "users": {
       "$uid": {
         ".write": "$uid === auth.uid"
-      },
+      }
     },
     ".read": false,
     ".write": false
   }
 }
+

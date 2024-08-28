@@ -1,0 +1,37 @@
+state0 = {
+  keyboxes: { "player1": "encryptedkeys", player2: "encryptedkeys" },
+  stars: { 
+    "1": { name: "Homeworld1", x: 5, y: 10, z: 15, "econ": 0, "industry": 0, strength: 100 },
+    "2": { name: "Homeworld2", x: 25, y: 30, z: 15, "econ": 0, "industry": 0 },
+  }
+  fleets: {
+    "1": { name: "Crusher", x: 5, y: 10, z: 15, "orbiting": "1", strength: "1" }
+    "2": { name: "Traveler", x: 55, y: 10, z: 15, "orbiting": "-1", "destination": "2", strength: 10 }
+  }
+}
+
+state1 = {
+  keyboxes: { "player1": "encryptedkeys", player2: "encryptedkeys" },
+  stars: { 
+    "1": { name: "Homeworld1", x: 5, y: 10, z: 15, "econ": 0, "industry": 10, "strength": 10 },
+    "2": { name: "Homeworld2", x: 25, y: 30, z: 15, "econ": 5, "industry": 0 },
+  }
+  fleets: {
+    "1": { name: "Crusher", x: 5, y: 10, z: 15, "orbiting": "1", strength: 91 }
+    "2": { name: "Traveler", x: 45, y: 10, z: 15, "orbiting": "-1", "destination": "2", strength: 10 }
+  }
+}
+
+// let's try making a patch per object:
+patch0 = {
+  stars: { "1": { "industry": 10, "strength": 10 } }
+}
+patch1 = {
+  stars: { "2": { "econ": 5 } }
+}
+patch2 = {
+  fleets: { "1": { "strength": 91 } }
+}
+patch3 = {
+  fleets: { "2": { "x": 45 } }
+}

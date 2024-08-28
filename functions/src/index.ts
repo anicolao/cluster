@@ -1,6 +1,8 @@
+import type { GameAction } from "$common/gamestate";
 import type { MetaGameAction } from "$common/metagame";
 import * as admin from "firebase-admin";
 import { onValueCreated } from "firebase-functions/v2/database";
+import { joinGame, leaveGame } from "./game";
 import { createGame, deleteGame } from "./metagame";
 import { processProfileAction } from "./profile";
 
@@ -32,6 +34,16 @@ exports.gameAction = onValueCreated(
   "/games/{gameid}/{uid}/{actionid}",
   (event) => {
     console.log(event.params);
+    const action = event.data.val() as GameAction;
+    if (action.type === "join_game") {
+      const gameid = event.params.gameid;
+      return joinGame(gameid, action);
+    }
+    if (action.type === "leave_game") {
+      const gameid = event.params.gameid;
+      return leaveGame(gameid, action);
+    }
+    return undefined;
   },
 );
 
