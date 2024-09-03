@@ -1,10 +1,11 @@
-import type {
-  GameAction,
-  GameOptions,
-  GameState,
-  JoinGameAction,
-  LeaveGameAction,
-  PlayerInfo,
+import {
+  game,
+  initialGameState,
+  type GameAction,
+  type GameOptions,
+  type GameState,
+  type JoinGameAction,
+  type LeaveGameAction,
 } from "$common/gamestate.js";
 import type { UserProfile } from "$common/profiles.js";
 import * as admin from "firebase-admin";
@@ -55,41 +56,12 @@ async function getGameState(gameid: string) {
     }
   }
   if (gamestate.tick === undefined) {
-    // brand new gamestate
-    gamestate.tick = 0;
-    gamestate.started = false;
-    gamestate.completed = false;
-    gamestate.players = {};
     const options = (
       await db.doc(`/games/${gameid}`).get()
     ).data() as GameOptions;
-    gamestate.options = options;
+    gamestate = initialGameState(options);
   }
   return gamestate;
-}
-
-async function getProfile(profileDoc: DocumentReference<DocumentData>) {
-  const profile = (await profileDoc.get()).data() as UserProfile;
-  if (profile.games === undefined) profile.games = [];
-  return profile;
-}
-
-export function game(gamestate: GameState, action: GameAction) {
-  const nextstate = { ...gamestate };
-  if (action.type === "join_game") {
-    console.log(`joinGame ${action}`);
-    const { uid, alias, avatar } = action;
-    const playerInfo: PlayerInfo = { uid, alias, avatar };
-
-    nextstate.players = { ...nextstate.players };
-    nextstate.players[playerInfo.uid] = playerInfo;
-  } else if (action.type === "leave_game") {
-    console.log(`leaveGame ${action}`);
-    const { uid } = action;
-    nextstate.players = { ...nextstate.players };
-    delete nextstate.players[uid];
-  }
-  return nextstate;
 }
 
 export async function executeGameAction(gameid: string, action: GameAction) {
@@ -98,6 +70,13 @@ export async function executeGameAction(gameid: string, action: GameAction) {
   const p = diff(gamestate, nextstate);
   return writePatch(gameid, p);
 }
+
+async function getProfile(profileDoc: DocumentReference<DocumentData>) {
+  const profile = (await profileDoc.get()).data() as UserProfile;
+  if (profile.games === undefined) profile.games = [];
+  return profile;
+}
+
 export async function joinGame(gameid: string, action: JoinGameAction) {
   // update the profile for join/leave game
   const db = admin.firestore();

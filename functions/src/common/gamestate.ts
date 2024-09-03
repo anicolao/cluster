@@ -44,3 +44,31 @@ export type GameAction =
   | LeaveGameAction
   | StartGameAction
   | ComputeTickGameAction;
+
+export function initialGameState(options: GameOptions): GameState {
+  return {
+    tick: 0,
+    started: false,
+    completed: false,
+    players: {},
+    options,
+  };
+}
+
+export function game(gamestate: GameState, action: GameAction) {
+  const nextstate = { ...gamestate };
+  if (action.type === "join_game") {
+    console.log(`joinGame ${action}`);
+    const { uid, alias, avatar } = action;
+    const playerInfo: PlayerInfo = { uid, alias, avatar };
+
+    nextstate.players = { ...nextstate.players };
+    nextstate.players[playerInfo.uid] = playerInfo;
+  } else if (action.type === "leave_game") {
+    console.log(`leaveGame ${action}`);
+    const { uid } = action;
+    nextstate.players = { ...nextstate.players };
+    delete nextstate.players[uid];
+  }
+  return nextstate;
+}
