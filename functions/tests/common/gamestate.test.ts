@@ -43,10 +43,15 @@ describe("gamestate tests", () => {
   it("leaving a game removes the player", () => {
     const uid = "ABCDEF";
     let gamestate = joinGame(uid);
+    expect(gamestate.players[uid].uid).toBe(uid);
+    expect(Object.keys(gamestate.players).length).toBe(1);
+
     const leavegame: LeaveGameAction = {
       type: "leave_game",
       uid,
     };
     gamestate = game(gamestate, leavegame);
+    expect(gamestate.players[uid]).toBe(undefined);
+    expect(Object.keys(gamestate.players).length).toBe(0);
   });
 });
