@@ -60,6 +60,7 @@ async function getGameState(gameid: string) {
       await db.doc(`/games/${gameid}`).get()
     ).data() as GameOptions;
     gamestate = initialGameState(options);
+    await writePatch(gameid, gamestate);
   }
   return gamestate;
 }
