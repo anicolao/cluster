@@ -6,8 +6,8 @@ import {
   type GameState,
   type JoinGameAction,
   type LeaveGameAction,
-} from "$common/gamestate.js";
-import type { UserProfile } from "$common/profiles.js";
+} from "./common/gamestate";
+import type { UserProfile } from "$common/profiles";
 import * as admin from "firebase-admin";
 import type { DocumentData, DocumentReference } from "firebase-admin/firestore";
 import { type Patch, diff, patch } from "./patch";

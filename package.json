@@ -57,6 +57,7 @@
     "@sveltejs/package": "^2.3.1",
     "@sveltejs/vite-plugin-svelte": "^3.1.0",
     "@vitest/coverage-v8": "^1.5.1",
+    "firebase-tools": "^13.22.0",
     "husky": "^9.0.11",
     "publint": "^0.2.7",
     "rollup-plugin-shell": "^1.0.9",
@@ -75,5 +76,8 @@
     "@ourway/firestore-redux": "^0.0.1",
     "@ourway/svelte-firebase-auth": "^0.0.4",
     "@ourway/svelte-redux": "^0.0.2"
-  }
+  },
+  "trustedDependencies": [
+    "protobufjs"
+  ]
 }

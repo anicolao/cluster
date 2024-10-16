@@ -1,6 +1,9 @@
 export interface GameOptions {
-  autospawn: boolean; // automatically create a new similar game each time this one fills
-  playerCount: number; // number of players this game holds
+  name: string;
+  /** automatically create a new similar game each time this one fills */
+  autospawn: boolean;
+  /** number of players this game holds */
+  playerCount: number;
   deleted?: boolean;
 }
 
