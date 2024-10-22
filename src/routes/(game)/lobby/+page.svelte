@@ -1,4 +1,5 @@
 <script lang="ts">
+import { goto } from "$app/navigation";
 import type { GameAction, GameOptions } from "$common/gamestate";
 import type { UserProfile } from "$common/profiles";
 import { uid } from "$lib/auth";
@@ -84,15 +85,13 @@ function joinGame(gameid: string) {
       const alias = users[uid].alias;
       const avatar = users[uid].profile_image;
       pushAction(gameid, { type: "join_game", uid, alias, avatar });
+      goto(`/game/?id=${gameid}`);
     }
   };
 }
-function leaveGame(gameid: string) {
+function openGame(gameid: string) {
   return () => {
-    console.log("Leave: ", gameid);
-    if (uid !== undefined) {
-      pushAction(gameid, { type: "leave_game", uid });
-    }
+    goto(`/game/?id=${gameid}`);
   };
 }
 </script>
@@ -103,7 +102,7 @@ function leaveGame(gameid: string) {
   <p>Your games are: ....</p>
 <ul>
 {#each joinedGames as game}
-  <li><button on:click={leaveGame(game)}>Leave</button> {games[game].name}</li>
+  <li><button on:click={openGame(game)}>Open</button> {games[game].name}</li>
 {/each}
 </ul>
   <p>Join a new game! Choose one or more of: ....</p>
