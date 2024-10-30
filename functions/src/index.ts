@@ -1,6 +1,7 @@
 import type { GameAction } from "$common/gamestate";
 import type { MetaGameAction } from "$common/metagame";
 import * as admin from "firebase-admin";
+import { onSchedule } from "firebase-functions/scheduler";
 import { onValueCreated } from "firebase-functions/v2/database";
 import { executeGameAction, joinGame, leaveGame } from "./game";
 import { createGame, deleteGame } from "./metagame";
@@ -62,3 +63,7 @@ exports.metaGameAction = onValueCreated(
     return undefined;
   },
 );
+
+exports.tick = onSchedule("every 15 minutes", async () => {
+  console.log("empty tick function to be added");
+});

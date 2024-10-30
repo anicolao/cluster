@@ -1,16 +1,16 @@
+import type { UserProfile } from "$common/profiles";
+import { type Patch, diff, patch } from "@ourway/patch";
+import * as admin from "firebase-admin";
+import type { DocumentData, DocumentReference } from "firebase-admin/firestore";
 import {
-  game,
-  initialGameState,
   type GameAction,
   type GameOptions,
   type GameState,
   type JoinGameAction,
   type LeaveGameAction,
+  game,
+  initialGameState,
 } from "./common/gamestate";
-import type { UserProfile } from "$common/profiles";
-import * as admin from "firebase-admin";
-import type { DocumentData, DocumentReference } from "firebase-admin/firestore";
-import { type Patch, diff, patch } from "./patch";
 
 async function writePatch(gameid: string, p: Patch) {
   const db = admin.firestore();

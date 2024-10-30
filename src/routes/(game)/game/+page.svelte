@@ -4,8 +4,8 @@ import { page } from "$app/stores";
 import type { GameAction, GameState } from "$common/gamestate";
 import { uid } from "$lib/auth";
 import { firestore, realtimeDB } from "$lib/firebase";
-import { patch } from "$lib/patch";
 import { push, ref } from "@firebase/database";
+import { patch } from "@ourway/patch";
 import {
   type Unsubscribe,
   collection,
