@@ -73,7 +73,7 @@ function leaveGame(gameid: string) {
 </script>
 
 <div class="main">
-  <h1>Game</h1>
+  <h1>Game tick {gameState.tick} started? {gameState.started}</h1>
 {#if gameState.options !== undefined}
   <p>Welcome to your game: {gameState.options.name}</p>
   <ul>

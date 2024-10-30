@@ -11,6 +11,9 @@ import {
   game,
   initialGameState,
 } from "./common/gamestate";
+import { CreateGameAction } from "$common/metagame";
+import { randomName } from "$common/gamenames";
+import { createGame } from "./metagame";
 
 async function writePatch(gameid: string, p: Patch) {
   const db = admin.firestore();
@@ -85,6 +88,13 @@ export async function joinGame(gameid: string, action: JoinGameAction) {
   const profile = await getProfile(profileDoc);
   profile.games = [...profile.games.filter((x) => x !== gameid), gameid];
   await profileDoc.set(profile);
+  // decrement the players needed counter on the game options
+  const gameDoc = db.doc(`/games/${gameid}`);
+  const options = (await gameDoc.get()).data();
+  if (options) {
+    options.playersNeeded--;
+    await gameDoc.update(options);
+  }
 
   return executeGameAction(gameid, action);
 }
@@ -96,6 +106,40 @@ export async function leaveGame(gameid: string, action: LeaveGameAction) {
   const profile = await getProfile(profileDoc);
   profile.games = profile.games.filter((x) => x !== gameid);
   await profileDoc.set(profile);
+  // increment the players needed counter on the game options
+  const gameDoc = db.doc(`/games/${gameid}`);
+  const options = (await gameDoc.get()).data();
+  if (options) {
+    options.playersNeeded++;
+    await gameDoc.update(options);
+  }
 
   return executeGameAction(gameid, action);
+}
+
+export async function updateGames() {
+  const ret = [];
+  const db = admin.firestore();
+  const games = db.collection(`/games`);
+  const snapshot = await games.get();
+  for (const game of snapshot.docs) {
+    const gameOptions = game.data();
+    console.log("JSON: ", JSON.stringify(gameOptions, null, 2));
+    if (gameOptions.started) {
+      ret.push(executeGameAction(game.id, { type: "compute_tick" }));
+    } else if (gameOptions.playersNeeded === 0) {
+      ret.push(executeGameAction(game.id, { type: "start_game" }));
+      gameOptions.started = true;
+      await game.ref.update(gameOptions);
+      if (gameOptions.autospawn) {
+        // create a replacement game
+        createGame({
+          name: randomName(),
+          autospawn: true,
+          playerCount: gameOptions.playerCount,
+        });
+      }
+    }
+  }
+  return Promise.all(ret);
 }

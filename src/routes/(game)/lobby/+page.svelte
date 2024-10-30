@@ -57,7 +57,7 @@ function updateGameList(userid: string) {
   if (userid === uid && users[uid]) {
     joinedGames = users[uid].games || [];
     joinableGames = Object.keys(games).filter(
-      (x) => joinedGames.indexOf(x) === -1,
+      (x) => joinedGames.indexOf(x) === -1 && !games[x].started,
     );
   }
 }
@@ -108,7 +108,11 @@ function openGame(gameid: string) {
   <p>Join a new game! Choose one or more of: ....</p>
 <ul>
 {#each joinableGames as game}
-  <li><button on:click={joinGame(game)}>Join</button> {games[game].name}</li>
+  {#if games[game].playersNeeded}
+    <li><button on:click={joinGame(game)}>Join</button> {games[game].name} (needs {games[game].playersNeeded} more players)</li>
+  {:else}
+    <li><button disabled>Full</button> {games[game].name}</li>
+  {/if}
 {/each}
 </ul>
   <p>

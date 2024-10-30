@@ -74,7 +74,7 @@
   "dependencies": {
     "@firebase/database": "^1.0.5",
     "@ourway/firestore-redux": "^0.0.1",
-    "@ourway/patch": "^0.1.1",
+    "@ourway/patch": "^0.1.2",
     "@ourway/svelte-firebase-auth": "^0.0.4",
     "@ourway/svelte-redux": "^0.0.2"
   },

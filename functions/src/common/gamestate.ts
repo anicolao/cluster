@@ -4,6 +4,9 @@ export interface GameOptions {
   autospawn: boolean;
   /** number of players this game holds */
   playerCount: number;
+  /** number of players needed to start this game */
+  playersNeeded?: number;
+  started?: boolean;
   deleted?: boolean;
 }
 
@@ -71,6 +74,10 @@ export function game(gamestate: GameState, action: GameAction) {
     const { uid } = action;
     nextstate.players = { ...nextstate.players };
     delete nextstate.players[uid];
+  } else if (action.type === "compute_tick") {
+    nextstate.tick++;
+  } else if (action.type === "start_game") {
+    nextstate.started = true;
   }
   return nextstate;
 }

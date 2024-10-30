@@ -6,7 +6,11 @@ export async function createGame(options: GameOptions) {
   const db = admin.firestore();
 
   const gameDoc = db.collection("/games").doc();
-  return gameDoc.set(options);
+  return gameDoc.set({
+    ...options,
+    playersNeeded: options.playerCount,
+    started: false,
+  });
 }
 
 export async function deleteGame(gameid: string) {
