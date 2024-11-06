@@ -128,6 +128,8 @@ export async function updateGames() {
           name: randomName(),
           autospawn: true,
           playerCount: gameOptions.playerCount,
+          playersNeeded: gameOptions.playerCount,
+          players: {},
         });
       }
     }

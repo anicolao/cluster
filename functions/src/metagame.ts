@@ -10,6 +10,7 @@ export async function createGame(options: GameOptions) {
     ...options,
     playersNeeded: options.playerCount,
     started: false,
+    players: {},
   });
 }
 

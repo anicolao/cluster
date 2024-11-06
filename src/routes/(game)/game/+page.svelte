@@ -76,7 +76,7 @@ function leaveGame(gameid: string) {
   <h1>Game tick {gameState.tick}</h1>
 {#if gameState.options?.started}
   {#if gameOver(gameState) && gameState.options.winner !== undefined}
-      Game Over. Congratulations to {gameState.players[gameState.options.winner].alias}!
+      Game Over. Congratulations to {gameState.options.players[gameState.options.winner].alias}!
   {/if}
 {:else}
     {#if gameState.options?.playersNeeded > 0}
@@ -89,10 +89,10 @@ function leaveGame(gameid: string) {
 {#if gameState.options !== undefined}
   <p>Welcome to your game: {gameState.options.name}</p>
   <ul>
-    {#each Object.keys(gameState.players) as pk}
+    {#each Object.keys(gameState.options?.players || {}) as pk}
       <li>
-        <img alt="avatar" src="{gameState.players[pk].avatar}"/>
-          {gameState.players[pk].alias}</li>
+        <img alt="avatar" src="{gameState.options.players[pk].avatar}"/>
+          {gameState.options.players[pk].alias}</li>
     {/each}
   </ul>
 {#if gameId}

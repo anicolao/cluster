@@ -9,6 +9,7 @@ export interface GameOptions {
   started?: boolean;
   deleted?: boolean;
   winner?: string;
+  players: { [k: string]: PlayerInfo };
 }
 
 export interface PlayerInfo {
@@ -19,7 +20,6 @@ export interface PlayerInfo {
 
 export interface GameState {
   tick: number;
-  players: { [k: string]: PlayerInfo };
   options: GameOptions;
 }
 
@@ -52,7 +52,6 @@ export type GameAction =
 export function initialGameState(options: GameOptions): GameState {
   return {
     tick: 0,
-    players: {},
     options,
   };
 }
@@ -68,26 +67,26 @@ export function game(gamestate: GameState, action: GameAction) {
     const { uid, alias, avatar } = action;
     const playerInfo: PlayerInfo = { uid, alias, avatar };
 
-    if (nextstate.players[playerInfo.uid] === undefined) {
-      nextstate.players = { ...nextstate.players };
-      nextstate.players[playerInfo.uid] = playerInfo;
+    if (nextstate.options.players[playerInfo.uid] === undefined) {
       nextstate.options = { ...nextstate.options };
+      nextstate.options.players = { ...nextstate.options.players };
+      nextstate.options.players[playerInfo.uid] = playerInfo;
       nextstate.options.playersNeeded -= 1;
     }
   } else if (action.type === "leave_game") {
     console.log(`leaveGame ${action}`);
     const { uid } = action;
-    nextstate.players = { ...nextstate.players };
-    if (nextstate.players[uid] !== undefined) {
-      delete nextstate.players[uid];
+    if (nextstate.options.players[uid] !== undefined) {
       nextstate.options = { ...nextstate.options };
+      nextstate.options.players = { ...nextstate.options.players };
+      delete nextstate.options.players[uid];
       nextstate.options.playersNeeded += 1;
     }
   } else if (action.type === "compute_tick") {
     if (!gameOver(nextstate)) {
       nextstate.tick++;
       if (Math.random() > 0.5) {
-        const players = Object.values(nextstate.players);
+        const players = Object.values(nextstate.options.players);
         const winner = Math.trunc(Math.random() * players.length);
         nextstate.options = { ...nextstate.options };
         nextstate.options.winner = players[winner].uid;

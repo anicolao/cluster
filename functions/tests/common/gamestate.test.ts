@@ -9,7 +9,7 @@ import {
 
 describe("gamestate tests", () => {
   function initGame() {
-    const options = {} as GameOptions;
+    const options = { players: {} } as GameOptions;
     return initialGameState(options);
   }
   function joinGame(
@@ -27,7 +27,7 @@ describe("gamestate tests", () => {
       alias,
       avatar,
     };
-    expect(gamestate.players[uid]).toBe(undefined);
+    expect(gamestate.options.players[uid]).toBe(undefined);
     return game(gamestate, joingame);
   }
   it("joining a game adds the player", () => {
@@ -35,23 +35,23 @@ describe("gamestate tests", () => {
     const alias = "anAlias";
     const avatar = "anAvatar";
     const gamestate = joinGame(uid, alias, avatar);
-    expect(gamestate.players[uid].uid).toBe(uid);
-    expect(gamestate.players[uid].alias).toBe(alias);
-    expect(gamestate.players[uid].avatar).toBe(avatar);
+    expect(gamestate.options.players[uid].uid).toBe(uid);
+    expect(gamestate.options.players[uid].alias).toBe(alias);
+    expect(gamestate.options.players[uid].avatar).toBe(avatar);
   });
 
   it("leaving a game removes the player", () => {
     const uid = "ABCDEF";
     let gamestate = joinGame(uid);
-    expect(gamestate.players[uid].uid).toBe(uid);
-    expect(Object.keys(gamestate.players).length).toBe(1);
+    expect(gamestate.options.players[uid].uid).toBe(uid);
+    expect(Object.keys(gamestate.options.players).length).toBe(1);
 
     const leavegame: LeaveGameAction = {
       type: "leave_game",
       uid,
     };
     gamestate = game(gamestate, leavegame);
-    expect(gamestate.players[uid]).toBe(undefined);
-    expect(Object.keys(gamestate.players).length).toBe(0);
+    expect(gamestate.options.players[uid]).toBe(undefined);
+    expect(Object.keys(gamestate.options.players).length).toBe(0);
   });
 });

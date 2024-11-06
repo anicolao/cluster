@@ -53,7 +53,13 @@ onDestroy(() => {
 function createGame() {
   const action: CreateGameAction = {
     type: "create_game",
-    gameOptions: { name, autospawn, playerCount, playersNeeded: playerCount },
+    gameOptions: {
+      name,
+      autospawn,
+      playerCount,
+      playersNeeded: playerCount,
+      players: {},
+    },
   };
   pushAction(action);
 
