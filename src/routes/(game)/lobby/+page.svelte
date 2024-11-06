@@ -111,7 +111,8 @@ function openGame(gameid: string) {
 <ul>
 {#each joinedGames as game}
   {#if games[game].winner !== undefined}
-    <li><button on:click={openGame(game)}>Open</button> {games[game].name} - Won by {users[games[game].winner].alias}</li>
+    {@const winnerUid = games[game].winner || ""}
+    <li><button on:click={openGame(game)}>Open</button> {games[game].name} - Won by {users[winnerUid].alias}</li>
   {/if}
 {/each}
 </ul>

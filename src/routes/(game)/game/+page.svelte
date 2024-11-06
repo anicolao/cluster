@@ -91,7 +91,7 @@ function leaveGame(gameid: string) {
   <ul>
     {#each Object.keys(gameState.players) as pk}
       <li>
-        <img src="{gameState.players[pk].avatar}"/>
+        <img alt="avatar" src="{gameState.players[pk].avatar}"/>
           {gameState.players[pk].alias}</li>
     {/each}
   </ul>
