@@ -102,7 +102,17 @@ function openGame(gameid: string) {
   <p>Your games are: ....</p>
 <ul>
 {#each joinedGames as game}
-  <li><button on:click={openGame(game)}>Open</button> {games[game].name}</li>
+  {#if games[game].winner === undefined}
+    <li><button on:click={openGame(game)}>Open</button> {games[game].name}</li>
+  {/if}
+{/each}
+</ul>
+  <p>Completed games:</p>
+<ul>
+{#each joinedGames as game}
+  {#if games[game].winner !== undefined}
+    <li><button on:click={openGame(game)}>Open</button> {games[game].name} - Won by {users[games[game].winner].alias}</li>
+  {/if}
 {/each}
 </ul>
   <p>Join a new game! Choose one or more of: ....</p>

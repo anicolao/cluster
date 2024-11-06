@@ -71,7 +71,14 @@ async function getGameState(gameid: string) {
 export async function executeGameAction(gameid: string, action: GameAction) {
   const gamestate = await getGameState(gameid);
   const nextstate = game(gamestate, action);
-  const p = diff(gamestate, nextstate);
+  const p = diff(gamestate, nextstate) as GameState;
+  if (p?.options !== undefined) {
+    // patch contains changes to the options, write them to
+    // the doc that contains options
+    const db = admin.firestore();
+    const gameDoc = db.doc(`/games/${gameid}`);
+    await gameDoc.set(nextstate.options);
+  }
   return writePatch(gameid, p);
 }
 
@@ -88,13 +95,6 @@ export async function joinGame(gameid: string, action: JoinGameAction) {
   const profile = await getProfile(profileDoc);
   profile.games = [...profile.games.filter((x) => x !== gameid), gameid];
   await profileDoc.set(profile);
-  // decrement the players needed counter on the game options
-  const gameDoc = db.doc(`/games/${gameid}`);
-  const options = (await gameDoc.get()).data();
-  if (options) {
-    options.playersNeeded--;
-    await gameDoc.update(options);
-  }
 
   return executeGameAction(gameid, action);
 }
@@ -106,13 +106,6 @@ export async function leaveGame(gameid: string, action: LeaveGameAction) {
   const profile = await getProfile(profileDoc);
   profile.games = profile.games.filter((x) => x !== gameid);
   await profileDoc.set(profile);
-  // increment the players needed counter on the game options
-  const gameDoc = db.doc(`/games/${gameid}`);
-  const options = (await gameDoc.get()).data();
-  if (options) {
-    options.playersNeeded++;
-    await gameDoc.update(options);
-  }
 
   return executeGameAction(gameid, action);
 }
@@ -129,8 +122,6 @@ export async function updateGames() {
       ret.push(executeGameAction(game.id, { type: "compute_tick" }));
     } else if (gameOptions.playersNeeded === 0) {
       ret.push(executeGameAction(game.id, { type: "start_game" }));
-      gameOptions.started = true;
-      await game.ref.update(gameOptions);
       if (gameOptions.autospawn) {
         // create a replacement game
         createGame({

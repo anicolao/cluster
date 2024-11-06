@@ -5,9 +5,10 @@ export interface GameOptions {
   /** number of players this game holds */
   playerCount: number;
   /** number of players needed to start this game */
-  playersNeeded?: number;
+  playersNeeded: number;
   started?: boolean;
   deleted?: boolean;
+  winner?: string;
 }
 
 export interface PlayerInfo {
@@ -60,6 +61,10 @@ export function initialGameState(options: GameOptions): GameState {
   };
 }
 
+export function gameOver(gamestate: GameState) {
+  return gamestate.options.winner !== undefined;
+}
+
 export function game(gamestate: GameState, action: GameAction) {
   const nextstate = { ...gamestate };
   if (action.type === "join_game") {
@@ -67,17 +72,35 @@ export function game(gamestate: GameState, action: GameAction) {
     const { uid, alias, avatar } = action;
     const playerInfo: PlayerInfo = { uid, alias, avatar };
 
-    nextstate.players = { ...nextstate.players };
-    nextstate.players[playerInfo.uid] = playerInfo;
+    if (nextstate.players[playerInfo.uid] === undefined) {
+      nextstate.players = { ...nextstate.players };
+      nextstate.players[playerInfo.uid] = playerInfo;
+      nextstate.options = { ...nextstate.options };
+      nextstate.options.playersNeeded -= 1;
+    }
   } else if (action.type === "leave_game") {
     console.log(`leaveGame ${action}`);
     const { uid } = action;
     nextstate.players = { ...nextstate.players };
-    delete nextstate.players[uid];
+    if (nextstate.players[uid] !== undefined) {
+      delete nextstate.players[uid];
+      nextstate.options = { ...nextstate.options };
+      nextstate.options.playersNeeded += 1;
+    }
   } else if (action.type === "compute_tick") {
-    nextstate.tick++;
+    if (!gameOver(nextstate)) {
+      nextstate.tick++;
+      if (Math.random() > 0.5) {
+        const players = Object.values(nextstate.players);
+        const winner = Math.trunc(Math.random() * players.length);
+        nextstate.options = { ...nextstate.options };
+        nextstate.options.winner = players[winner].uid;
+      }
+    }
   } else if (action.type === "start_game") {
     nextstate.started = true;
+    nextstate.options = { ...nextstate.options };
+    nextstate.options.started = true;
   }
   return nextstate;
 }

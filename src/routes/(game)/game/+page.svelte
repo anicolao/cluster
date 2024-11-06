@@ -1,7 +1,7 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { page } from "$app/stores";
-import type { GameAction, GameState } from "$common/gamestate";
+import { type GameAction, type GameState, gameOver } from "$common/gamestate";
 import { uid } from "$lib/auth";
 import { firestore, realtimeDB } from "$lib/firebase";
 import { push, ref } from "@firebase/database";
@@ -73,7 +73,19 @@ function leaveGame(gameid: string) {
 </script>
 
 <div class="main">
-  <h1>Game tick {gameState.tick} started? {gameState.started}</h1>
+  <h1>Game tick {gameState.tick}</h1>
+{#if gameState.started}
+  {#if gameOver(gameState) && gameState.options.winner !== undefined}
+      Game Over. Congratulations to {gameState.players[gameState.options.winner].alias}!
+  {/if}
+{:else}
+    {#if gameState.options?.playersNeeded > 0}
+      <p>Waiting for players...</p>
+    {:else}
+      <p>Waiting for first tick...</p>
+    {/if}
+{/if}
+
 {#if gameState.options !== undefined}
   <p>Welcome to your game: {gameState.options.name}</p>
   <ul>
