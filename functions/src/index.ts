@@ -3,7 +3,7 @@ import type { MetaGameAction } from "$common/metagame";
 import * as admin from "firebase-admin";
 import { onSchedule } from "firebase-functions/scheduler";
 import { onValueCreated } from "firebase-functions/v2/database";
-import { executeGameAction, joinGame, leaveGame, updateGames } from "./game";
+import { executeGameAction, updateGames } from "./game";
 import { createGame, deleteGame } from "./metagame";
 import { processProfileAction } from "./profile";
 
@@ -37,12 +37,6 @@ exports.gameAction = onValueCreated(
     console.log(event.params);
     const action = event.data.val() as GameAction;
     const gameid = event.params.gameid;
-    if (action.type === "join_game") {
-      return joinGame(gameid, action);
-    }
-    if (action.type === "leave_game") {
-      return leaveGame(gameid, action);
-    }
     return executeGameAction(gameid, action);
   },
 );

@@ -55,7 +55,9 @@ let users: { [k: string]: UserProfile } = {};
 
 function updateGameList(userid: string) {
   if (userid === uid && users[uid]) {
-    joinedGames = users[uid].games || [];
+    joinedGames = Object.keys(games).filter(
+      (x) => games[x].players && games[x].players[userid] !== undefined,
+    );
     joinableGames = Object.keys(games).filter(
       (x) => joinedGames.indexOf(x) === -1 && !games[x].started,
     );

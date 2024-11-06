@@ -1,17 +1,12 @@
-import type { UserProfile } from "$common/profiles";
 import { type Patch, diff, patch } from "@ourway/patch";
 import * as admin from "firebase-admin";
-import type { DocumentData, DocumentReference } from "firebase-admin/firestore";
 import {
   type GameAction,
   type GameOptions,
   type GameState,
-  type JoinGameAction,
-  type LeaveGameAction,
   game,
   initialGameState,
 } from "./common/gamestate";
-import { CreateGameAction } from "$common/metagame";
 import { randomName } from "$common/gamenames";
 import { createGame } from "./metagame";
 
@@ -80,34 +75,6 @@ export async function executeGameAction(gameid: string, action: GameAction) {
     await gameDoc.set(nextstate.options);
   }
   return writePatch(gameid, p);
-}
-
-async function getProfile(profileDoc: DocumentReference<DocumentData>) {
-  const profile = (await profileDoc.get()).data() as UserProfile;
-  if (profile.games === undefined) profile.games = [];
-  return profile;
-}
-
-export async function joinGame(gameid: string, action: JoinGameAction) {
-  // update the profile for join/leave game
-  const db = admin.firestore();
-  const profileDoc = db.doc(`/profiles/${action.uid}`);
-  const profile = await getProfile(profileDoc);
-  profile.games = [...profile.games.filter((x) => x !== gameid), gameid];
-  await profileDoc.set(profile);
-
-  return executeGameAction(gameid, action);
-}
-
-export async function leaveGame(gameid: string, action: LeaveGameAction) {
-  // update the profile for join/leave game
-  const db = admin.firestore();
-  const profileDoc = db.doc(`/profiles/${action.uid}`);
-  const profile = await getProfile(profileDoc);
-  profile.games = profile.games.filter((x) => x !== gameid);
-  await profileDoc.set(profile);
-
-  return executeGameAction(gameid, action);
 }
 
 export async function updateGames() {
