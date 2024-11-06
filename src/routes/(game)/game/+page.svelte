@@ -74,7 +74,7 @@ function leaveGame(gameid: string) {
 
 <div class="main">
   <h1>Game tick {gameState.tick}</h1>
-{#if gameState.started}
+{#if gameState.options?.started}
   {#if gameOver(gameState) && gameState.options.winner !== undefined}
       Game Over. Congratulations to {gameState.players[gameState.options.winner].alias}!
   {/if}

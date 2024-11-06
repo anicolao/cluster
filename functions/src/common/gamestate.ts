@@ -19,8 +19,6 @@ export interface PlayerInfo {
 
 export interface GameState {
   tick: number;
-  started: boolean;
-  completed: boolean;
   players: { [k: string]: PlayerInfo };
   options: GameOptions;
 }
@@ -54,8 +52,6 @@ export type GameAction =
 export function initialGameState(options: GameOptions): GameState {
   return {
     tick: 0,
-    started: false,
-    completed: false,
     players: {},
     options,
   };
@@ -98,7 +94,6 @@ export function game(gamestate: GameState, action: GameAction) {
       }
     }
   } else if (action.type === "start_game") {
-    nextstate.started = true;
     nextstate.options = { ...nextstate.options };
     nextstate.options.started = true;
   }
