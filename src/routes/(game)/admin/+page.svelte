@@ -55,6 +55,7 @@ function createGame() {
     type: "create_game",
     gameOptions: {
       name,
+      started: false,
       autospawn,
       playerCount,
       playersNeeded: playerCount,

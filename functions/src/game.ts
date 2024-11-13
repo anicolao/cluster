@@ -93,6 +93,7 @@ export async function updateGames() {
         // create a replacement game
         createGame({
           name: randomName(),
+          started: false,
           autospawn: true,
           playerCount: gameOptions.playerCount,
           playersNeeded: gameOptions.playerCount,
