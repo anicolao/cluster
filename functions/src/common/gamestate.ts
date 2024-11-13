@@ -6,7 +6,7 @@ export interface GameOptions {
   playerCount: number;
   /** number of players needed to start this game */
   playersNeeded: number;
-  started?: boolean;
+  started: boolean;
   deleted?: boolean;
   winner?: string;
   players: { [k: string]: PlayerInfo };
@@ -83,9 +83,9 @@ export function game(gamestate: GameState, action: GameAction) {
       nextstate.options.playersNeeded += 1;
     }
   } else if (action.type === "compute_tick") {
-    if (!gameOver(nextstate)) {
+    if (!gameOver(nextstate) && nextstate.options.started === true) {
       nextstate.tick++;
-      if (Math.random() > 0.5) {
+      if (nextstate.tick > 1 && Math.random() > 0.5) {
         const players = Object.values(nextstate.options.players);
         const winner = Math.trunc(Math.random() * players.length);
         nextstate.options = { ...nextstate.options };
@@ -93,8 +93,10 @@ export function game(gamestate: GameState, action: GameAction) {
       }
     }
   } else if (action.type === "start_game") {
-    nextstate.options = { ...nextstate.options };
-    nextstate.options.started = true;
+    if (nextstate.options.playersNeeded === 0) {
+      nextstate.options = { ...nextstate.options };
+      nextstate.options.started = true;
+    }
   }
   return nextstate;
 }

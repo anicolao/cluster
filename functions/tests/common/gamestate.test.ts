@@ -1,15 +1,27 @@
 import { describe, expect, it } from "vitest";
 import {
+  type ComputeTickGameAction,
   type GameOptions,
   type JoinGameAction,
   type LeaveGameAction,
+  type StartGameAction,
   game,
   initialGameState,
 } from "../../src/common/gamestate";
 
 describe("gamestate tests", () => {
+  const startgame: StartGameAction = {
+    type: "start_game",
+  };
   function initGame() {
-    const options = { players: {} } as GameOptions;
+    const options: GameOptions = {
+      name: "test game",
+      started: false,
+      autospawn: true,
+      playerCount: 1,
+      playersNeeded: 1,
+      players: {},
+    };
     return initialGameState(options);
   }
   function joinGame(
@@ -53,5 +65,71 @@ describe("gamestate tests", () => {
     gamestate = game(gamestate, leavegame);
     expect(gamestate.options.players[uid]).toBe(undefined);
     expect(Object.keys(gamestate.options.players).length).toBe(0);
+  });
+  it("starts the game", () => {
+    let gamestate = joinGame();
+    expect(gamestate.options.started).toBe(false);
+    expect(gamestate.tick).toBe(0);
+    expect(gamestate.options.winner).toBe(undefined);
+
+    gamestate = game(gamestate, startgame);
+    expect(gamestate.options.started).toBe(true);
+    expect(gamestate.tick).toBe(0);
+    expect(gamestate.options.winner).toBe(undefined);
+  });
+  it("advances the first tick", () => {
+    const computetick: ComputeTickGameAction = {
+      type: "compute_tick",
+    };
+    let gamestate = joinGame();
+    expect(gamestate.tick).toBe(0);
+    expect(gamestate.options.started).toBe(false);
+    expect(gamestate.options.winner).toBe(undefined);
+
+    gamestate = game(gamestate, startgame);
+    expect(gamestate.tick).toBe(0);
+    expect(gamestate.options.started).toBe(true);
+    expect(gamestate.options.winner).toBe(undefined);
+
+    gamestate = game(gamestate, computetick);
+    expect(gamestate.tick).toBe(1);
+    expect(gamestate.options.started).toBe(true);
+    expect(gamestate.options.winner).toBe(undefined);
+  });
+  it("advances ticks", () => {
+    const computetick: ComputeTickGameAction = {
+      type: "compute_tick",
+    };
+    let gamestate = joinGame();
+    expect(gamestate.tick).toBe(0);
+    expect(gamestate.options.started).toBe(false);
+    expect(gamestate.options.winner).toBe(undefined);
+
+    gamestate = game(gamestate, startgame);
+    expect(gamestate.tick).toBe(0);
+    expect(gamestate.options.started).toBe(true);
+    expect(gamestate.options.winner).toBe(undefined);
+
+    let gameover = false;
+    const N = 20;
+    let i = 0;
+    while (i < N) {
+      ++i;
+      gamestate = game(gamestate, computetick);
+      gameover = gamestate.options.winner !== undefined;
+      expect(gamestate.options.started).toBe(true);
+      if (gameover) {
+        break;
+      }
+      expect(gamestate.tick).toBe(i);
+      expect(gamestate.options.winner).toBe(undefined);
+    }
+    expect(gamestate.tick).toBe(i);
+    expect(gamestate.options.started).toBe(true);
+    if (gameover) {
+      expect(gamestate.options.winner).toBe("ABCD");
+    } else {
+      expect(gamestate.options.winner).toBe(undefined);
+    }
   });
 });

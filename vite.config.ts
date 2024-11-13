@@ -1,5 +1,5 @@
 import { sveltekit } from "@sveltejs/kit/vite";
-import { defineConfig } from "vitest/config";
+import { coverageConfigDefaults, defineConfig } from "vitest/config";
 import execute from "rollup-plugin-shell";
 
 export default defineConfig({
@@ -9,6 +9,14 @@ export default defineConfig({
   ],
   test: {
     include: ["tests/**/*.{test,spec}.{js,ts}"],
+    coverage: {
+      exclude: [
+        "build/**",
+        "functions/**",
+        "svelte.config.js",
+        ...coverageConfigDefaults.exclude,
+      ],
+    },
   },
   server: {
     fs: {
