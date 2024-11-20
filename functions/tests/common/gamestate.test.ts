@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   type ComputeTickGameAction,
+  type CreateChatRoom,
   type GameOptions,
   type JoinGameAction,
   type LeaveGameAction,
@@ -8,6 +9,7 @@ import {
   game,
   initialGameState,
 } from "../../src/common/gamestate";
+import { decrypt, encrypt } from "../../src/common/crypt";
 
 describe("gamestate tests", () => {
   const startgame: StartGameAction = {
@@ -131,5 +133,27 @@ describe("gamestate tests", () => {
     } else {
       expect(gamestate.options.winner).toBe(undefined);
     }
+  });
+  it("makes a chat room", () => {
+    let gamestate = joinGame();
+    expect(Object.keys(gamestate.rooms).length).toBe(0);
+    const key = "!";
+    const title = "Chat room title";
+    const timestamp = "2783467823";
+    const createChat: CreateChatRoom = {
+      type: "create_chat_room",
+      title: encrypt(key, title),
+      creator: "ABCD",
+      key,
+      timestamp,
+    };
+    gamestate = game(gamestate, createChat);
+    const rooms = Object.keys(gamestate.rooms);
+    expect(rooms.length).toBe(1);
+    const roomId = rooms[0];
+    const room = gamestate.rooms[roomId];
+    expect(decrypt(key, room.title)).toBe(title);
+    expect(decrypt(key, room.chats[timestamp].playerid)).toBe("ABCD");
+    expect(decrypt(key, room.chats[timestamp].content)).toBe("@ABCD");
   });
 });

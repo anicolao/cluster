@@ -1,6 +1,7 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { page } from "$app/stores";
+import { encrypt } from "$common/crypt";
 import { type GameAction, type GameState, gameOver } from "$common/gamestate";
 import { uid } from "$lib/auth";
 import { firestore, realtimeDB } from "$lib/firebase";
@@ -70,6 +71,23 @@ function leaveGame(gameid: string) {
     }
   };
 }
+
+let roomName = "";
+function createChatRoom() {
+  if (gameId && uid) {
+    console.log(`Create chat room ${roomName}`);
+    const timestamp = `${new Date().getTime()}`;
+    const key = `${Math.round(Math.random() * 10)}`;
+    pushAction(gameId, {
+      type: "create_chat_room",
+      title: encrypt(key, roomName),
+      creator: uid,
+      key,
+      timestamp,
+    });
+    roomName = "";
+  }
+}
 </script>
 
 <div class="main">
@@ -95,6 +113,10 @@ function leaveGame(gameid: string) {
           {gameState.options.players[pk].alias}</li>
     {/each}
   </ul>
+  <p>Create a chat room:
+    <input bind:value={roomName} placeholder="New Chat Room Name" />
+    <button on:click={createChatRoom}>Create</button>
+  </p>
 {#if gameId}
     <button on:click={leaveGame(gameId)}>Leave</button>
 {/if}
