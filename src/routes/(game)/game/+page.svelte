@@ -1,8 +1,13 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { page } from "$app/stores";
-import { encrypt } from "$common/crypt";
-import { type GameAction, type GameState, gameOver } from "$common/gamestate";
+import { decrypt } from "$common/crypt";
+import {
+  type ChatRoom,
+  type GameAction,
+  type GameState,
+  gameOver,
+} from "$common/gamestate";
 import { uid } from "$lib/auth";
 import { firestore, realtimeDB } from "$lib/firebase";
 import { push, ref } from "@firebase/database";
@@ -22,8 +27,49 @@ let unsubscribeFromGamePatches: Unsubscribe | undefined;
 $: gameId = $page.url.searchParams.get("id");
 
 let gameState: GameState = {} as GameState;
+const chatRooms: { [k: string]: ChatRoom } = {};
 let lastTimeStamp = 0;
 
+// biome-ignore lint/suspicious/noExplicitAny: data came from firebase, no type
+function processNewObject(key: string, objectId: string, newObject: any) {
+  if (newObject.title !== undefined) {
+    const chatRoom: ChatRoom = newObject as ChatRoom;
+    chatRooms[objectId] = chatRoom;
+  } else if (newObject.roomId !== undefined) {
+    const { roomId, parentId, id, timestamp, content, creator } = newObject;
+    if (!chatRooms[roomId]) {
+      // new chat room found.
+      function processChats(id: string) {
+        const chatOrRoom = JSON.parse(
+          decrypt(key, gameState.objects[id]) || "{}",
+        );
+        if (chatOrRoom.id) {
+          gameState.keys[id][uid || ""] = gameState.keys[objectId][uid || ""];
+          console.log(
+            `Set key for ${chatOrRoom.id} to ${gameState.keys[id][uid || ""]}`,
+          );
+          processChats(chatOrRoom.parentId);
+          chatRooms[roomId].chats[chatOrRoom.timestamp] = { ...chatOrRoom };
+        } else if (chatOrRoom.title) {
+          gameState.keys[id][uid || ""] = gameState.keys[objectId][uid || ""];
+          console.log(
+            `Set key for ${chatOrRoom.id} to ${gameState.keys[id][uid || ""]}`,
+          );
+          processNewObject(key, id, chatOrRoom);
+        }
+      }
+      processChats(newObject.parentId);
+    }
+    chatRooms[roomId].chats[timestamp] = {
+      id,
+      roomId: newObject.roomId,
+      timestamp,
+      creator,
+      parentId,
+      content,
+    };
+  }
+}
 function subscribeToGamePatches() {
   const blocks = collection(firestore, `games/${gameId}/blocks`);
   unsubscribeFromGamePatches = onSnapshot(
@@ -39,9 +85,36 @@ function subscribeToGamePatches() {
           .sort();
         for (const time of timestamps) {
           if (+time > lastTimeStamp) {
-            gameState = patch(gameState, JSON.parse(block[time])) as GameState;
+            const patchData = JSON.parse(block[time]);
+            gameState = patch(gameState, patchData) as GameState;
             lastTimeStamp = +time;
             console.log(`Applied game state patch for time ${lastTimeStamp}`);
+            if (uid && patchData?.keys) {
+              const privateKey = uid[0];
+              for (const objectId of Object.keys(patchData.keys)) {
+                if (!gameState.keys[objectId]) continue;
+                const key = decrypt(privateKey, gameState.keys[objectId][uid]);
+                if (key !== null) {
+                  const newObject = JSON.parse(
+                    decrypt(key, gameState.objects[objectId]) || "{}",
+                  );
+                  processNewObject(key, objectId, newObject);
+                }
+              }
+            }
+            if (uid && patchData?.objects) {
+              const privateKey = uid[0];
+              for (const objectId of Object.keys(patchData.objects)) {
+                if (!gameState.keys[objectId]) continue;
+                const key = decrypt(privateKey, gameState.keys[objectId][uid]);
+                if (key !== null) {
+                  const newObject = JSON.parse(
+                    decrypt(key, patchData.objects[objectId]) || "{}",
+                  );
+                  processNewObject(key, objectId, newObject);
+                }
+              }
+            }
           }
         }
       }
@@ -80,13 +153,44 @@ function createChatRoom() {
     const key = `${Math.round(Math.random() * 10)}`;
     pushAction(gameId, {
       type: "create_chat_room",
-      title: encrypt(key, roomName),
+      title: roomName,
       creator: uid,
       key,
       timestamp,
     });
     roomName = "";
   }
+}
+let chatContent = "";
+function postChat(roomId: string) {
+  return () => {
+    if (uid !== undefined && gameId) {
+      const timestamp = `${new Date().getTime()}`;
+      const privateKey = uid[0];
+      const key = decrypt(privateKey, gameState.keys[roomId][uid]);
+      let parentId = roomId;
+      const sortedTimestamps = Object.keys(chatRooms[roomId].chats)
+        .filter((x) => +x)
+        .sort()
+        .reverse();
+      if (sortedTimestamps.length) {
+        parentId = chatRooms[roomId].chats[sortedTimestamps[0]].id;
+      }
+      if (key !== null) {
+        const content = chatContent;
+        pushAction(gameId, {
+          type: "post_chat",
+          roomId,
+          parentId,
+          content,
+          creator: uid,
+          key,
+          timestamp,
+        });
+      }
+      chatContent = "";
+    }
+  };
 }
 </script>
 
@@ -111,6 +215,19 @@ function createChatRoom() {
       <li>
         <img alt="avatar" src="{gameState.options.players[pk].avatar}"/>
           {gameState.options.players[pk].alias}</li>
+    {/each}
+  </ul>
+  <p>Chat rooms</p>
+  <ul>
+    {#each Object.keys(chatRooms) as roomId}
+        <li>{chatRooms[roomId].title}
+          <ul>
+          {#each Object.keys(chatRooms[roomId].chats) as timestamp}
+            <li>{new Date(+timestamp).toLocaleString({dateStyle: "short"})} <b>{chatRooms[roomId].chats[timestamp].content}</b></li>
+          {/each}
+            <li><input bind:value={chatContent} placeholder="Message" /><button on:click={postChat(roomId)}>Create</button></li>
+          </ul>
+        </li>
     {/each}
   </ul>
   <p>Create a chat room:

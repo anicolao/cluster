@@ -19,21 +19,25 @@ export interface PlayerInfo {
   alias: string;
   avatar: string;
   publicKey: string;
-  keyBox: string;
 }
 
-export interface Chat {
-  playerid: string;
-  content: string;
-}
 export interface ChatRoom {
   title: string;
-  chats: { [timestamp: string]: Chat };
+  chats: { [timestamp: string]: ChatMessage };
+}
+export interface ChatMessage {
+  roomId: string;
+  id: string;
+  parentId: string;
+  creator: string;
+  content: string;
+  timestamp: number;
 }
 export interface GameState {
   tick: number;
   options: GameOptions;
-  rooms: { [id: string]: ChatRoom };
+  keys: { [id: string]: { [playerid: string]: string } };
+  objects: { [id: string]: string };
 }
 
 export interface JoinGameAction {
@@ -64,18 +68,30 @@ export interface CreateChatRoom {
   timestamp: string;
 }
 
+export interface PostChat {
+  type: "post_chat";
+  roomId: string;
+  parentId: string;
+  content: string;
+  creator: string;
+  key: string;
+  timestamp: string;
+}
+
 export type GameAction =
   | JoinGameAction
   | LeaveGameAction
   | StartGameAction
   | ComputeTickGameAction
-  | CreateChatRoom;
+  | CreateChatRoom
+  | PostChat;
 
 export function initialGameState(options: GameOptions): GameState {
   return {
     tick: 0,
     options,
-    rooms: {},
+    objects: {},
+    keys: {},
   };
 }
 
@@ -89,8 +105,7 @@ export function game(gamestate: GameState, action: GameAction) {
     console.log(`joinGame ${action}`);
     const { uid, alias, avatar } = action;
     const publicKey = uid[0];
-    const keyBox = encrypt(publicKey, "{}");
-    const playerInfo: PlayerInfo = { uid, alias, avatar, publicKey, keyBox };
+    const playerInfo: PlayerInfo = { uid, alias, avatar, publicKey };
 
     if (nextstate.options.players[playerInfo.uid] === undefined) {
       nextstate.options = { ...nextstate.options };
@@ -125,8 +140,6 @@ export function game(gamestate: GameState, action: GameAction) {
   } else if (action.type === "create_chat_room") {
     const { title, creator, key, timestamp } = action;
     console.log(title, creator, key, timestamp);
-    const decryptedTitle = decrypt(key, title);
-    console.log(`decryptedTitle ${decryptedTitle}`);
     nextstate.options = { ...nextstate.options };
     nextstate.options.players = { ...nextstate.options.players };
     nextstate.options.players[creator] = {
@@ -134,23 +147,54 @@ export function game(gamestate: GameState, action: GameAction) {
     };
     const player = nextstate.options.players[creator];
     const privateKey = player.publicKey; // TODO: use an actually private thing
-    const boxJson = decrypt(privateKey, player.keyBox);
-    if (decryptedTitle !== null && boxJson !== null) {
-      const roomId = uuid();
-      console.log(`roomId ${roomId}`);
-      nextstate.rooms = { ...nextstate.rooms };
-      nextstate.rooms[roomId] = {
-        title,
-        chats: {},
-      };
-      nextstate.rooms[roomId].chats[timestamp] = {
-        playerid: encrypt(key, creator),
-        content: encrypt(key, `@${creator}`),
-      };
+    const roomId = uuid();
+    console.log(`roomId ${roomId}`);
+    nextstate.objects = { ...nextstate.objects };
+    const chatRoom: ChatRoom = {
+      title,
+      chats: {},
+    };
+    chatRoom.chats[timestamp] = {
+      id: roomId,
+      roomId,
+      parentId: roomId,
+      timestamp: +timestamp,
+      creator,
+      content: `@${creator}`,
+    };
+    nextstate.objects[roomId] = encrypt(key, JSON.stringify(chatRoom));
 
-      const box = JSON.parse(boxJson);
-      box[roomId] = key;
-      player.keyBox = encrypt(player.publicKey, JSON.stringify(box));
+    nextstate.keys = { ...nextstate.keys };
+    nextstate.keys[roomId] = {};
+    for (const playerId in nextstate.options.players) {
+      nextstate.keys[roomId][playerId] = "badkey";
+    }
+    nextstate.keys[roomId][creator] = encrypt(privateKey, key);
+  } else if (action.type === "post_chat") {
+    const { content, creator, key, roomId, parentId, timestamp } = action;
+    const player = nextstate.options.players[creator];
+    const privateKey = player.publicKey; // TODO: use an actually private thing
+    const chatId = uuid();
+    nextstate.objects = { ...nextstate.objects };
+    const chat: ChatMessage = {
+      roomId,
+      id: chatId,
+      parentId,
+      creator,
+      timestamp: +timestamp,
+      content,
+    };
+    nextstate.objects[chatId] = encrypt(key, JSON.stringify(chat));
+
+    nextstate.keys = { ...nextstate.keys };
+    nextstate.keys[chatId] = { ...nextstate.keys[parentId] };
+    nextstate.keys[chatId][creator] = encrypt(privateKey, key);
+    if (content.match(/^@[A-Za-z0-9]*$/) !== null) {
+      const shareId = content.substring(1);
+      if (nextstate.keys[chatId][shareId]) {
+        const shareKey = nextstate.options.players[shareId].publicKey; // TODO: use an actually private thing
+        nextstate.keys[chatId][shareId] = encrypt(shareKey, key);
+      }
     }
   }
   return nextstate;
