@@ -89,27 +89,18 @@ function subscribeToGamePatches() {
             gameState = patch(gameState, patchData) as GameState;
             lastTimeStamp = +time;
             console.log(`Applied game state patch for time ${lastTimeStamp}`);
-            if (uid && patchData?.keys) {
+            if (uid && (patchData?.keys || patchData?.objects)) {
               const privateKey = uid[0];
-              for (const objectId of Object.keys(patchData.keys)) {
+              const allKeysTogether = {
+                ...patchData?.keys,
+                ...patchData?.objects,
+              };
+              for (const objectId of Object.keys(allKeysTogether)) {
                 if (!gameState.keys[objectId]) continue;
                 const key = decrypt(privateKey, gameState.keys[objectId][uid]);
                 if (key !== null) {
                   const newObject = JSON.parse(
                     decrypt(key, gameState.objects[objectId]) || "{}",
-                  );
-                  processNewObject(key, objectId, newObject);
-                }
-              }
-            }
-            if (uid && patchData?.objects) {
-              const privateKey = uid[0];
-              for (const objectId of Object.keys(patchData.objects)) {
-                if (!gameState.keys[objectId]) continue;
-                const key = decrypt(privateKey, gameState.keys[objectId][uid]);
-                if (key !== null) {
-                  const newObject = JSON.parse(
-                    decrypt(key, patchData.objects[objectId]) || "{}",
                   );
                   processNewObject(key, objectId, newObject);
                 }
