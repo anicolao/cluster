@@ -7,5 +7,8 @@ export default defineConfig({
       reporter: ["text", "json", "html", "lcov"],
       exclude: ["lib/**", ...coverageConfigDefaults.exclude],
     },
+    typecheck: {
+      include: ["tests/**/*.test-d.ts"],
+    },
   },
 });

@@ -1,18 +1,19 @@
 {
   "name": "functions",
   "scripts": {
-    "lint": "biome check src tests",
-    "lint:fix": "biome check --write src tests",
-    "format": "biome format --write src tests",
     "build": "tsc",
     "build:watch": "esbuild src/index.ts --outdir=./lib --target=node18 --platform=node --format=cjs --sourcemap --bundle --watch",
+    "ci": "biome ci src tests",
+    "deploy": "firebase deploy --only functions",
+    "format": "biome format --write src tests",
+    "lint": "biome check src tests",
+    "lint:fix": "biome check --write src tests",
+    "logs": "firebase functions:log",
     "serve": "bun run build && firebase emulators:start --only functions",
     "shell": "bun run build && firebase functions:shell",
     "start": "bun run shell",
-    "deploy": "firebase deploy --only functions",
-    "test": "vitest run --coverage",
-    "test:watch": "vitest watch --coverage",
-    "logs": "firebase functions:log"
+    "test": "vitest run --coverage --typecheck",
+    "test:watch": "vitest watch --coverage --typecheck"
   },
   "main": "lib/index.js",
   "dependencies": {

@@ -17,6 +17,9 @@ export default defineConfig({
         ...coverageConfigDefaults.exclude,
       ],
     },
+    typecheck: {
+      include: ["tests/**/*.test-d.ts"],
+    },
   },
   server: {
     fs: {

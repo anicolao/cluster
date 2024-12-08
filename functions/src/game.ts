@@ -1,3 +1,4 @@
+import { randomName } from "$common/gamenames";
 import { type Patch, diff, patch } from "@ourway/patch";
 import * as admin from "firebase-admin";
 import {
@@ -7,7 +8,6 @@ import {
   game,
   initialGameState,
 } from "./common/gamestate";
-import { randomName } from "$common/gamenames";
 import { createGame } from "./metagame";
 
 async function writePatch(gameid: string, p: Patch) {
