@@ -12,6 +12,8 @@ import {
 import { decrypt, encrypt } from "../../src/common/crypt";
 
 describe("gamestate tests", () => {
+  const gamekey = "6";
+
   const startgame: StartGameAction = {
     type: "start_game",
   };
@@ -24,7 +26,7 @@ describe("gamestate tests", () => {
       playersNeeded: 1,
       players: {},
     };
-    return initialGameState(options);
+    return initialGameState(gamekey, options);
   }
   function joinGame(
     optional_uid?: string,
@@ -42,7 +44,7 @@ describe("gamestate tests", () => {
       avatar,
     };
     expect(gamestate.options.players[uid]).toBe(undefined);
-    return game(gamestate, joingame);
+    return game(gamekey, gamestate, joingame);
   }
   it("joining a game adds the player", () => {
     const uid = "ABCD";
@@ -64,7 +66,7 @@ describe("gamestate tests", () => {
       type: "leave_game",
       uid,
     };
-    gamestate = game(gamestate, leavegame);
+    gamestate = game(gamekey, gamestate, leavegame);
     expect(gamestate.options.players[uid]).toBe(undefined);
     expect(Object.keys(gamestate.options.players).length).toBe(0);
   });
@@ -74,7 +76,7 @@ describe("gamestate tests", () => {
     expect(gamestate.tick).toBe(0);
     expect(gamestate.options.winner).toBe(undefined);
 
-    gamestate = game(gamestate, startgame);
+    gamestate = game(gamekey, gamestate, startgame);
     expect(gamestate.options.started).toBe(true);
     expect(gamestate.tick).toBe(0);
     expect(gamestate.options.winner).toBe(undefined);
@@ -88,12 +90,12 @@ describe("gamestate tests", () => {
     expect(gamestate.options.started).toBe(false);
     expect(gamestate.options.winner).toBe(undefined);
 
-    gamestate = game(gamestate, startgame);
+    gamestate = game(gamekey, gamestate, startgame);
     expect(gamestate.tick).toBe(0);
     expect(gamestate.options.started).toBe(true);
     expect(gamestate.options.winner).toBe(undefined);
 
-    gamestate = game(gamestate, computetick);
+    gamestate = game(gamekey, gamestate, computetick);
     expect(gamestate.tick).toBe(1);
     expect(gamestate.options.started).toBe(true);
     expect(gamestate.options.winner).toBe(undefined);
@@ -107,7 +109,7 @@ describe("gamestate tests", () => {
     expect(gamestate.options.started).toBe(false);
     expect(gamestate.options.winner).toBe(undefined);
 
-    gamestate = game(gamestate, startgame);
+    gamestate = game(gamekey, gamestate, startgame);
     expect(gamestate.tick).toBe(0);
     expect(gamestate.options.started).toBe(true);
     expect(gamestate.options.winner).toBe(undefined);
@@ -117,7 +119,7 @@ describe("gamestate tests", () => {
     let i = 0;
     while (i < N) {
       ++i;
-      gamestate = game(gamestate, computetick);
+      gamestate = game(gamekey, gamestate, computetick);
       gameover = gamestate.options.winner !== undefined;
       expect(gamestate.options.started).toBe(true);
       if (gameover) {
@@ -147,7 +149,7 @@ describe("gamestate tests", () => {
       key,
       timestamp,
     };
-    gamestate = game(gamestate, createChat);
+    gamestate = game(gamekey, gamestate, createChat);
     //const rooms = Object.keys(gamestate.rooms);
     //expect(rooms.length).toBe(1);
     //const roomId = rooms[0];

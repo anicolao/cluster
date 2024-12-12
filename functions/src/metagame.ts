@@ -6,11 +6,15 @@ export async function createGame(options: GameOptions) {
   const db = admin.firestore();
 
   const gameDoc = db.collection("/games").doc();
-  return gameDoc.set({
+  await gameDoc.set({
     ...options,
     playersNeeded: options.playerCount,
     started: false,
     players: {},
+  });
+  const keyDoc = db.doc(`/gamekeys/${gameDoc.id}`)
+  return keyDoc.set({
+    key: "8",
   });
 }
 

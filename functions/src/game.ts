@@ -53,19 +53,22 @@ async function getGameState(gameid: string) {
       gamestate = patch(gamestate, JSON.parse(block.data()[k])) as GameState;
     }
   }
+  const key = (await db.doc(`/gamekeys/${gameid}`).get()).data() as {
+    key: string;
+  };
   if (gamestate.tick === undefined) {
     const options = (
       await db.doc(`/games/${gameid}`).get()
     ).data() as GameOptions;
-    gamestate = initialGameState(options);
+    gamestate = initialGameState(key.key, options);
     await writePatch(gameid, gamestate);
   }
-  return gamestate;
+  return { gamestate, key: key.key };
 }
 
 export async function executeGameAction(gameid: string, action: GameAction) {
-  const gamestate = await getGameState(gameid);
-  const nextstate = game(gamestate, action);
+  const { gamestate, key } = await getGameState(gameid);
+  const nextstate = game(key, gamestate, action);
   const p = diff(gamestate, nextstate) as GameState;
   if (p?.options !== undefined) {
     // patch contains changes to the options, write them to

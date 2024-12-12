@@ -6,12 +6,16 @@ import {
   type ChatRoom,
   type GameAction,
   type GameState,
+  type Position,
+  type Star,
   gameOver,
 } from "$common/gamestate";
 import { uid } from "$lib/auth";
+import Galaxy from "$lib/components/Galaxy.svelte";
 import { firestore, realtimeDB } from "$lib/firebase";
 import { push, ref } from "@firebase/database";
 import { patch } from "@ourway/patch";
+import { Canvas } from "@threlte/core";
 import {
   type Unsubscribe,
   collection,
@@ -29,6 +33,8 @@ $: gameId = $page.url.searchParams.get("id");
 let gameState: GameState = {} as GameState;
 const chatRooms: { [k: string]: ChatRoom } = {};
 let lastTimeStamp = 0;
+
+const stars: Star[] = [];
 
 // biome-ignore lint/suspicious/noExplicitAny: data came from firebase, no type
 function processNewObject(key: string, objectId: string, newObject: any) {
@@ -68,6 +74,9 @@ function processNewObject(key: string, objectId: string, newObject: any) {
       parentId,
       content,
     };
+  } else if (newObject.type === "star") {
+    const star = newObject as Star;
+    stars.push(star);
   }
 }
 function subscribeToGamePatches() {
@@ -88,7 +97,10 @@ function subscribeToGamePatches() {
             const patchData = JSON.parse(block[time]);
             gameState = patch(gameState, patchData) as GameState;
             lastTimeStamp = +time;
-            console.log(`Applied game state patch for time ${lastTimeStamp}`);
+            console.log(
+              `Applied game state patch for time ${lastTimeStamp}`,
+              patchData,
+            );
             if (uid && (patchData?.keys || patchData?.objects)) {
               const privateKey = uid[0];
               const allKeysTogether = {
@@ -97,12 +109,15 @@ function subscribeToGamePatches() {
               };
               for (const objectId of Object.keys(allKeysTogether)) {
                 if (!gameState.keys[objectId]) continue;
-                const key = decrypt(privateKey, gameState.keys[objectId][uid]);
-                if (key !== null) {
-                  const newObject = JSON.parse(
-                    decrypt(key, gameState.objects[objectId]) || "{}",
-                  );
-                  processNewObject(key, objectId, newObject);
+                const decryptionKey = gameState.keys[objectId][uid];
+                if (decryptionKey) {
+                  const key = decrypt(privateKey, decryptionKey);
+                  if (key !== null) {
+                    const newObject = JSON.parse(
+                      decrypt(key, gameState.objects[objectId]) || "{}",
+                    );
+                    processNewObject(key, objectId, newObject);
+                  }
                 }
               }
             }
@@ -208,6 +223,11 @@ function postChat(roomId: string) {
           {gameState.options.players[pk].alias}</li>
     {/each}
   </ul>
+  <div class="map">
+      <Canvas>
+        <Galaxy {stars} />
+      </Canvas>
+  </div>
   <p>Chat rooms</p>
   <ul>
     {#each Object.keys(chatRooms) as roomId}
@@ -240,4 +260,11 @@ function postChat(roomId: string) {
     padding-left: 2em;
     padding-right: 2em;
   }
+
+  .map {
+    border: 1px solid red;
+    width: 900px;
+    height: 900px;
+  }
 </style>
+

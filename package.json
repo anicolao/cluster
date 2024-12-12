@@ -77,6 +77,8 @@
     "@ourway/patch": "^0.1.2",
     "@ourway/svelte-firebase-auth": "^0.0.4",
     "@ourway/svelte-redux": "^0.0.2",
+    "@threlte/core": "^7.3.1",
+    "@threlte/extras": "^8.12.0",
     "uuid": "^11.0.3"
   },
   "trustedDependencies": [

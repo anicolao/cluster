@@ -86,25 +86,111 @@ export type GameAction =
   | CreateChatRoom
   | PostChat;
 
-export function initialGameState(options: GameOptions): GameState {
-  return {
+export type Position = [number, number, number];
+export interface Star {
+  type: "star";
+  starClass: "M";
+  position: Position;
+}
+function generateUniverse(): Star[] {
+  function getPoint(): Position {
+    const u = Math.random();
+    const v = Math.random();
+    const theta = u * 2.0 * Math.PI;
+    const phi = Math.acos(2.0 * v - 1.0);
+    const r = Math.cbrt(Math.random());
+    const sinTheta = Math.sin(theta);
+    const cosTheta = Math.cos(theta);
+    const sinPhi = Math.sin(phi);
+    const cosPhi = Math.cos(phi);
+    const x = r * sinPhi * cosTheta;
+    const y = r * sinPhi * sinTheta;
+    const z = r * cosPhi;
+    return [x, y, z];
+  }
+  const t = (1 + Math.sqrt(5)) / 2;
+
+  const homeStars: Position[] = [
+    [-1, t, 0],
+    [1, t, 0],
+    [-1, -t, 0],
+    [1, -t, 0],
+    [0, -1, t],
+    [0, 1, t],
+    [0, -1, -t],
+    [0, 1, -t],
+    [t, 0, -1],
+    [t, 0, 1],
+    [-t, 0, -1],
+    [-t, 0, 1],
+  ];
+
+  function makeStar(position: Position): Star {
+    return { type: "star", starClass: "M", position };
+  }
+
+  const stars: Star[] = [];
+  const NEIGHBOURS = 15;
+  function makeNeighbourhood(homeStar: Position) {
+    //stars.push(homeStar);
+
+    for (let i = 0; i < NEIGHBOURS; ++i) {
+      const star = getPoint();
+      let scaleFactor = 0.1;
+      if (scaleFactor < 0) scaleFactor = 0.0001;
+      stars.push(
+        makeStar([
+          homeStar[0] + star[0],
+          homeStar[1] + star[1],
+          scaleFactor * (homeStar[2] + star[2]),
+        ]),
+      );
+    }
+  }
+
+  for (const homeStar of homeStars) {
+    makeNeighbourhood(homeStar);
+  }
+  return stars;
+}
+export function initialGameState(
+  gamekey: string,
+  options: GameOptions,
+): GameState {
+  const initialState = {
     tick: 0,
     options,
     objects: {},
     keys: {},
-  };
+  } as GameState;
+  const stars = generateUniverse();
+  for (const s of stars) {
+    const starId = uuid();
+    const starKey = `${Math.trunc(Math.random() * 10)}`;
+    initialState.objects[starId] = encrypt(starKey, JSON.stringify(s));
+    initialState.keys[starId] = {
+      key: encrypt(gamekey, starKey),
+    };
+  }
+
+  return initialState;
 }
 
 export function gameOver(gamestate: GameState) {
   return gamestate.options.winner !== undefined;
 }
 
-export function game(gamestate: GameState, action: GameAction) {
+export function game(
+  gamekey: string,
+  gamestate: GameState,
+  action: GameAction,
+) {
   const nextstate = { ...gamestate };
   if (action.type === "join_game") {
     console.log(`joinGame ${action}`);
     const { uid, alias, avatar } = action;
     const publicKey = uid[0];
+    const privateKey = publicKey;
     const playerInfo: PlayerInfo = { uid, alias, avatar, publicKey };
 
     if (nextstate.options.players[playerInfo.uid] === undefined) {
@@ -112,6 +198,18 @@ export function game(gamestate: GameState, action: GameAction) {
       nextstate.options.players = { ...nextstate.options.players };
       nextstate.options.players[playerInfo.uid] = playerInfo;
       nextstate.options.playersNeeded -= 1;
+    }
+    nextstate.keys = { ...nextstate.keys };
+    for (const objectId in gamestate.objects) {
+      if (nextstate.keys[objectId]) {
+        nextstate.keys[objectId] = { ...nextstate.keys[objectId] };
+      } else {
+        continue;
+      }
+      const starKey = decrypt(gamekey, nextstate.keys[objectId].key);
+      if (starKey !== null) {
+        nextstate.keys[objectId][uid] = encrypt(privateKey, starKey);
+      }
     }
   } else if (action.type === "leave_game") {
     console.log(`leaveGame ${action}`);
