@@ -6,7 +6,6 @@ import {
   type ChatRoom,
   type GameAction,
   type GameState,
-  type Position,
   type Star,
   gameOver,
 } from "$common/gamestate";
@@ -198,23 +197,63 @@ function postChat(roomId: string) {
     }
   };
 }
+let currentTab = "";
+let tabParity = 0;
+function openTab(x: Event) {
+  if (x.srcElement.id !== currentTab) {
+    tabParity += 1;
+    //if (currentTab === "") {
+    currentTab = x.srcElement.id;
+    //} else {
+    //currentTab = "";
+    //window.setTimeout(() => currentTab = x.srcElement.id, 450);
+    //}
+  } else {
+    currentTab = "";
+    tabParity = 0;
+  }
+}
+function closeTab(x: Event) {
+  currentTab = "";
+}
 </script>
 
 <div class="main">
-  <h1>Game tick {gameState.tick}</h1>
-{#if gameState.options?.started}
-  {#if gameOver(gameState) && gameState.options.winner !== undefined}
-      Game Over. Congratulations to {gameState.options.players[gameState.options.winner].alias}!
-  {/if}
-{:else}
-    {#if gameState.options?.playersNeeded > 0}
-      <p>Waiting for players...</p>
-    {:else}
-      <p>Waiting for first tick...</p>
-    {/if}
-{/if}
-
 {#if gameState.options !== undefined}
+  <div class="map">
+      <div class="sidebar">
+        <div class="buttonrow">
+          <div class="fill"/>
+          <div class="panel" class:open={currentTab==="wide"} on:click={closeTab}>
+            wide
+          </div>
+        </div>
+      </div>
+      <div class="sidebar">
+        <div class="buttonrow">
+          <div class="fill"/>
+          <div class="panel" class:open={currentTab==="tall"} on:click={closeTab}>
+            tall
+          </div>
+        </div>
+      </div>
+      <div class="sidebar">
+        <div class="buttonrow">
+          <div class="fill"/>
+          <div class="panel" class:open={currentTab==="hello"} on:click={closeTab}>
+  <h1>Game tick {gameState.tick}</h1>
+  {#if gameState.options?.started}
+    {#if gameOver(gameState) && gameState.options.winner !== undefined}
+        Game Over. Congratulations to {gameState.options.players[gameState.options.winner].alias}!
+    {/if}
+  {:else}
+      {#if gameState.options?.playersNeeded > 0}
+        <p>Waiting for players...</p>
+      {:else}
+        <p>Waiting for first tick...</p>
+      {/if}
+  {/if}
+
   <p>Welcome to your game: {gameState.options.name}</p>
   <ul>
     {#each Object.keys(gameState.options?.players || {}) as pk}
@@ -223,11 +262,6 @@ function postChat(roomId: string) {
           {gameState.options.players[pk].alias}</li>
     {/each}
   </ul>
-  <div class="map">
-      <Canvas>
-        <Galaxy {stars} />
-      </Canvas>
-  </div>
   <p>Chat rooms</p>
   <ul>
     {#each Object.keys(chatRooms) as roomId}
@@ -248,6 +282,53 @@ function postChat(roomId: string) {
 {#if gameId}
     <button on:click={leaveGame(gameId)}>Leave</button>
 {/if}
+          </div>
+        </div>
+      </div>
+      <div class="sidebar">
+        <div class="buttonrow">
+          <div class="fill"/>
+          <div class="buttoncolumn" class:borderopen={currentTab!==""} class:odd={tabParity % 2 !== 0} class:even={tabParity %2 === 0}>
+            <div class="fill">
+              <div class="fill"/>
+              <div class="oddborder"/>
+              <div class="evenborder"/>
+            </div>
+            <div class="row">
+              <div id="hello" class="button" class:open={currentTab==="hello"} on:click={openTab}>
+                Hello
+              </div>
+              <div class="oddborder" class:open={currentTab==="hello"}/>
+              <div class="evenborder" class:open={currentTab==="hello"}/>
+            </div>
+            <div class="row">
+              <div id="wide" class="button"  class:open={currentTab==="wide"} on:click={openTab}>
+                Wide button
+              </div>
+              <div class="oddborder" class:open={currentTab==="wide"}/>
+              <div class="evenborder" class:open={currentTab==="wide"}/>
+            </div>
+            <div class="row">
+              <div id="tall" class="button" class:open={currentTab==="tall"} on:click={openTab}>
+                Tall<br>button
+              </div>
+              <div class="oddborder" class:open={currentTab==="tall"}/>
+              <div class="evenborder" class:open={currentTab==="tall"}/>
+            </div>
+            <div class="fill">
+              <div class="fill"/>
+              <div class="oddborder"/>
+              <div class="evenborder"/>
+          </div>
+          </div>
+        </div>
+      </div>
+      <Canvas>
+        <Galaxy {stars} />
+      </Canvas>
+  </div>
+    <!--
+    -->
 {:else}
     Loading...
 {/if}
@@ -257,14 +338,95 @@ function postChat(roomId: string) {
     margin-top: 0;
   }
   .main {
-    padding-left: 2em;
-    padding-right: 2em;
+    padding: 0;
+    margin: 0;
   }
-
   .map {
-    border: 1px solid red;
-    width: 900px;
-    height: 900px;
+    width: 100vw;
+    height: 100vh;
+  }
+  .sidebar {
+    position: fixed;
+    pointer-events: none;
+  }
+  .buttonrow {
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+    pointer-events: none;
+  }
+  .buttoncolumn {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    pointer-events: none;
+  }
+  .button {
+    display: flex;
+    border: 3px solid green;
+    margin-right: 0;
+    border-right: none;
+    border-radius: 10px 0 0 10px;
+    padding: 4px;
+    background-color: #000;
+    pointer-events: all;
+    transition: transform 0.4s;
+    width: 100%;
+    margin-right: -3px;
+  }
+  .row {
+    display: flex;
+    flex-direction: row;
+  }
+  .open {
+    transform: translateX(-50vw);
+  }
+  .evenborder.open {
+    transform: translateX(0);
+  }
+  .oddborder.open {
+    transform: translateX(0);
+  }
+  .panel {
+    width: 50vw;
+    height: 100vh;
+    background: #00880084;
+      transform: translateX(50vw);
+    transition: transform 0.4s;
+    pointer-events: all;
+    overflow: scroll;
+  }
+  .panel.open {
+      transform: translateX(0);
+  }
+  .button.open {
+    background: #00880084;
+  }
+  .buttoncolumn.borderopen.odd .oddborder.open {
+    opacity: 0.00001;
+  }
+  .buttoncolumn.borderopen.odd .oddborder {
+      transform: translateX(-50vw);
+  }
+  .buttoncolumn.borderopen.even .evenborder.open {
+    opacity: 0.00001;
+  }
+  .buttoncolumn.borderopen.even .evenborder {
+      transform: translateX(-50vw);
+  }
+  .fill {
+    display: flex;
+    flex-grow: 1;
+    pointer-events: none;
+  }
+  .buttoncolumn .oddborder {
+    border-right: 3px solid green;
+    transition: transform 0.4s;
+    margin-right: -3px;
+  }
+  .buttoncolumn .evenborder {
+    border-right: 3px solid green;
+    transition: transform 0.4s;
   }
 </style>
 
