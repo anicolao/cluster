@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { Position, Star } from "$common/gamestate";
 import { T, useFrame } from "@threlte/core";
-import { OrbitControls, interactivity } from "@threlte/extras";
+import { OrbitControls, Stars, interactivity } from "@threlte/extras";
 import { type PerspectiveCamera, Quaternion, Vector3 } from "three";
 
 interactivity();
@@ -73,6 +73,8 @@ function midPoint(p0: Position, p1: Position): Position {
   return ret;
 }
 </script>
+
+<Stars />
 
 <T.Group >
   <T.PerspectiveCamera
