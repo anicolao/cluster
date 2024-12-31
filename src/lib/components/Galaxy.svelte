@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { Position, Star } from "$common/gamestate";
 import { T, useFrame } from "@threlte/core";
-import { OrbitControls, Stars, interactivity } from "@threlte/extras";
+import { Float, OrbitControls, Stars, interactivity } from "@threlte/extras";
 import { linear } from "svelte/easing";
 import { tweened } from "svelte/motion";
 import { type PerspectiveCamera, Quaternion, Vector3 } from "three";
@@ -117,36 +117,38 @@ const shaderTime = tweened(0, { easing: linear });
     lastStar === i ? "#00ee00" : starColor[i] ? starColor[i] : defaultStarColor
     }
   {@const position = star.position}
-  <T.Mesh
-    {position}
-    on:click={routeClick(i)}
-    on:pointerenter={starHilight(i)}
-    on:pointerleave={starUnhilight(i)}
-  >
-    <T.SphereGeometry args={[0.05, 32, 16]} />
-    <T.ShaderMaterial
-      {fragmentShader}
-      {vertexShader}
-      uniforms={{
-        time: {
-          value: i,
-        },
-        scale: {
-          value: 100,
-        },
-        highTemp: {
-          value: 4500,
-        },
-        lowTemp: {
-          value: 3000
-        },
-      }}
-      uniforms.time.value={i + $shaderTime}
-    />
-    {#if lastStar === i}
-      <T.PointLight args={["#00ff00", 0]} />
-    {/if}
-  </T.Mesh>
+  <Float floatIntensity={0.2} >
+    <T.Mesh
+      {position}
+      on:click={routeClick(i)}
+      on:pointerenter={starHilight(i)}
+      on:pointerleave={starUnhilight(i)}
+    >
+      <T.SphereGeometry args={[0.05, 32, 16]} />
+      <T.ShaderMaterial
+        {fragmentShader}
+        {vertexShader}
+        uniforms={{
+          time: {
+            value: i,
+          },
+          scale: {
+            value: 100,
+          },
+          highTemp: {
+            value: 4500,
+          },
+          lowTemp: {
+            value: 3000
+          },
+        }}
+        uniforms.time.value={i + $shaderTime}
+      />
+      {#if lastStar === i}
+        <T.PointLight args={["#00ff00", 0]} />
+      {/if}
+    </T.Mesh>
+  </Float>
 {/each}
 <!-- Draw route between stars -->
 {#each route as starIndex, i}
