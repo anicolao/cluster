@@ -1,12 +1,14 @@
 <script lang="ts">
 import type { Position, Star } from "$common/gamestate";
 import { T, useFrame } from "@threlte/core";
-import { Float, OrbitControls, Stars, interactivity } from "@threlte/extras";
+import { FakeGlowMaterial, Float, OrbitControls, Stars, interactivity } from "@threlte/extras";
 import { linear } from "svelte/easing";
 import { tweened } from "svelte/motion";
 import { type PerspectiveCamera, Quaternion, Vector3 } from "three";
 import vertexShader from "./dynamic-vertex-shader.glsl?raw";
 import fragmentShader from "./noise-grainy-fragment.glsl?raw";
+import coronaVertexShader from "./corona-vertex-shader.glsl?raw";
+import coronaFragmentShader from "./corona-fragment-shader.glsl?raw";
 
 interactivity();
 
@@ -81,6 +83,17 @@ function midPoint(p0: Position, p1: Position): Position {
   return ret;
 }
 const shaderTime = tweened(0, { easing: linear });
+
+const typeToTemps = {
+  O: { lowTemp: 30000, highTemp: 100000 },
+  B: { lowTemp: 10000, highTemp: 30000 },
+  A: { lowTemp: 7500, highTemp: 10000 },
+  F: { lowTemp: 6500, highTemp: 7500 },
+  G: { lowTemp: 5000, highTemp: 6000 },
+  K: { lowTemp: 3500, highTemp: 5000 },
+  M: { lowTemp: 500, highTemp: 3500 },
+};
+const type = "K";
 </script>
 
 <Stars />
@@ -136,11 +149,14 @@ const shaderTime = tweened(0, { easing: linear });
             value: 100,
           },
           highTemp: {
-            value: 4500,
+            value: typeToTemps[type].highTemp,
           },
           lowTemp: {
-            value: 3000
+            value: typeToTemps[type].lowTemp,
           },
+          color: {
+            value: color
+          }
         }}
         uniforms.time.value={i + $shaderTime}
       />
