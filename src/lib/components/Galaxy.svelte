@@ -2,7 +2,11 @@
 import type { Position, Star } from "$common/gamestate";
 import { T, useFrame } from "@threlte/core";
 import { OrbitControls, Stars, interactivity } from "@threlte/extras";
+import { linear } from "svelte/easing";
+import { tweened } from "svelte/motion";
 import { type PerspectiveCamera, Quaternion, Vector3 } from "three";
+import vertexShader from "./dynamic-vertex-shader.glsl?raw";
+import fragmentShader from "./noise-grainy-fragment.glsl?raw";
 
 interactivity();
 
@@ -12,6 +16,10 @@ export let stars: Star[] = [];
 let frameCount = 0;
 
 useFrame(() => {
+  if (frameCount % 60000 === 0) {
+    shaderTime.set(0, { duration: 0 });
+    shaderTime.set(1, { duration: 1000000 });
+  }
   frameCount++;
 });
 
@@ -72,6 +80,7 @@ function midPoint(p0: Position, p1: Position): Position {
   console.log(p0, p1, ret);
   return ret;
 }
+const shaderTime = tweened(0, { easing: linear });
 </script>
 
 <Stars />
@@ -115,7 +124,25 @@ function midPoint(p0: Position, p1: Position): Position {
     on:pointerleave={starUnhilight(i)}
   >
     <T.SphereGeometry args={[0.05, 32, 16]} />
-    <T.MeshStandardMaterial {color} />
+    <T.ShaderMaterial
+      {fragmentShader}
+      {vertexShader}
+      uniforms={{
+        time: {
+          value: i,
+        },
+        scale: {
+          value: 100,
+        },
+        highTemp: {
+          value: 4500,
+        },
+        lowTemp: {
+          value: 3000
+        },
+      }}
+      uniforms.time.value={i + $shaderTime}
+    />
     {#if lastStar === i}
       <T.PointLight args={["#00ff00", 0]} />
     {/if}
