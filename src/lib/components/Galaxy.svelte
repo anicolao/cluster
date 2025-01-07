@@ -34,11 +34,11 @@ useFrame(() => {
 const cameraPosition: [number, number, number] = [0, 0, 20];
 let cameraRef: PerspectiveCamera;
 let route: number[] = [];
-let starColor: { [k: number]: string } = {};
-const defaultStarColor = "#f85122";
+let starColor: { [k: number]: number } = {};
+const defaultStarColor = 0xf85122;
 function starHilight(i: number) {
   return () => {
-    starColor[i] = "#FFEA00";
+    starColor[i] = 0xffea00;
   };
 }
 function starUnhilight(i: number) {
@@ -49,7 +49,7 @@ function starUnhilight(i: number) {
 function routeClick(i: number) {
   return () => {
     route.push(i);
-    const closestColor = "#ffffff";
+    const closestColor = 0xffffff;
     for (const ck in starColor) {
       if (starColor[ck] === closestColor) {
         starColor[ck] = defaultStarColor;
@@ -59,7 +59,7 @@ function routeClick(i: number) {
       .map((p, j) => [dist(p.position, stars[i].position), j])
       .sort((a, b) => a[0] - b[0]);
     for (let i = 1; i < 4; ++i) {
-      starColor[starDistances[i][1]] = "#ffffff";
+      starColor[starDistances[i][1]] = 0xffffff;
     }
     // biome-ignore lint/correctness/noSelfAssign: Threlte-reactivity
     starColor = starColor;
@@ -72,8 +72,8 @@ function routeClick(i: number) {
 
 const aStar = Math.trunc(Math.random() * stars.length);
 const bStar = Math.trunc(Math.random() * stars.length);
-starColor[aStar] = "#0000ff";
-starColor[bStar] = "#00ff00";
+starColor[aStar] = 0x0000ff;
+starColor[bStar] = 0x00ff00;
 console.log("aStar", aStar);
 
 const radii = [0.5, 1, 1.5, 2, 2.5, 3];
@@ -133,7 +133,7 @@ const type = "K";
 {#each stars as star, i}
   {@const lastStar = route[route.length - 1]}
   {@const color =
-    lastStar === i ? "#00ee00" : starColor[i] ? starColor[i] : defaultStarColor
+    lastStar === i ? 0x00ee00 : starColor[i] ? starColor[i] : defaultStarColor
     }
   {@const position = star.position}
   <Float floatIntensity={0.2} >
@@ -154,17 +154,15 @@ const type = "K";
           scale: {
             value: 100,
           },
-          highTemp: {
-            value: typeToTemps[type].highTemp,
+          highColor: {
+            value: 0x00ff0000,
           },
-          lowTemp: {
-            value: typeToTemps[type].lowTemp,
+          lowColor: {
+            value: 0x00000000,
           },
-          color: {
-            value: color
-          }
         }}
         uniforms.time.value={i + $shaderTime}
+        uniforms.highColor.value={color}
       />
       {#if lastStar === i}
         <T.PointLight args={["#00ff00", 0]} />
