@@ -34,6 +34,7 @@ const chatRooms: { [k: string]: ChatRoom } = {};
 let lastTimeStamp = 0;
 
 const stars: Star[] = [];
+const starIds: { [k: string]: Star } = {};
 
 // biome-ignore lint/suspicious/noExplicitAny: data came from firebase, no type
 function processNewObject(key: string, objectId: string, newObject: any) {
@@ -75,7 +76,11 @@ function processNewObject(key: string, objectId: string, newObject: any) {
     };
   } else if (newObject.type === "star") {
     const star = newObject as Star;
-    stars.push(star);
+    if (starIds[objectId] === undefined) {
+      starIds[objectId] = star;
+      stars.push(star);
+      console.log(`#stars ${stars.length}`);
+    }
   }
 }
 function subscribeToGamePatches() {
@@ -199,21 +204,18 @@ function postChat(roomId: string) {
 }
 let currentTab = "";
 let tabParity = 0;
-function openTab(x: Event) {
-  if (x.srcElement.id !== currentTab) {
-    tabParity += 1;
-    //if (currentTab === "") {
-    currentTab = x.srcElement.id;
-    //} else {
-    //currentTab = "";
-    //window.setTimeout(() => currentTab = x.srcElement.id, 450);
-    //}
-  } else {
-    currentTab = "";
-    tabParity = 0;
-  }
+function openTab(tabId: string) {
+  return (_: Event) => {
+    if (tabId !== currentTab) {
+      tabParity += 1;
+      currentTab = tabId;
+    } else {
+      currentTab = "";
+      tabParity = 0;
+    }
+  };
 }
-function closeTab(x: Event) {
+function closeTab(_: Event) {
   currentTab = "";
 }
 </script>
@@ -268,7 +270,7 @@ function closeTab(x: Event) {
         <li>{chatRooms[roomId].title}
           <ul>
           {#each Object.keys(chatRooms[roomId].chats) as timestamp}
-            <li>{new Date(+timestamp).toLocaleString({dateStyle: "short"})} <b>{chatRooms[roomId].chats[timestamp].content}</b></li>
+            <li>{new Date(+timestamp).toLocaleString('en-US', {dateStyle: "short"})} <b>{chatRooms[roomId].chats[timestamp].content}</b></li>
           {/each}
             <li><input bind:value={chatContent} placeholder="Message" /><button on:click={postChat(roomId)}>Create</button></li>
           </ul>
@@ -295,21 +297,21 @@ function closeTab(x: Event) {
               <div class="evenborder"/>
             </div>
             <div class="row">
-              <div id="hello" class="button" class:open={currentTab==="hello"} on:click={openTab}>
+              <div id="hello" class="button" class:open={currentTab==="hello"} on:click={openTab("hello")}>
                 Hello
               </div>
               <div class="oddborder" class:open={currentTab==="hello"}/>
               <div class="evenborder" class:open={currentTab==="hello"}/>
             </div>
             <div class="row">
-              <div id="wide" class="button"  class:open={currentTab==="wide"} on:click={openTab}>
+              <div id="wide" class="button"  class:open={currentTab==="wide"} on:click={openTab("wide")}>
                 Wide button
               </div>
               <div class="oddborder" class:open={currentTab==="wide"}/>
               <div class="evenborder" class:open={currentTab==="wide"}/>
             </div>
             <div class="row">
-              <div id="tall" class="button" class:open={currentTab==="tall"} on:click={openTab}>
+              <div id="tall" class="button" class:open={currentTab==="tall"} on:click={openTab("tall")}>
                 Tall<br>button
               </div>
               <div class="oddborder" class:open={currentTab==="tall"}/>

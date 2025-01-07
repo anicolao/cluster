@@ -1,14 +1,20 @@
 <script lang="ts">
 import type { Position, Star } from "$common/gamestate";
 import { T, useFrame } from "@threlte/core";
-import { FakeGlowMaterial, Float, OrbitControls, Stars, interactivity } from "@threlte/extras";
+import {
+  FakeGlowMaterial,
+  Float,
+  OrbitControls,
+  Stars,
+  interactivity,
+} from "@threlte/extras";
 import { linear } from "svelte/easing";
 import { tweened } from "svelte/motion";
 import { type PerspectiveCamera, Quaternion, Vector3 } from "three";
+import coronaFragmentShader from "./corona-fragment-shader.glsl?raw";
+import coronaVertexShader from "./corona-vertex-shader.glsl?raw";
 import vertexShader from "./dynamic-vertex-shader.glsl?raw";
 import fragmentShader from "./noise-grainy-fragment.glsl?raw";
-import coronaVertexShader from "./corona-vertex-shader.glsl?raw";
-import coronaFragmentShader from "./corona-fragment-shader.glsl?raw";
 
 interactivity();
 
