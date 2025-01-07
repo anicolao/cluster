@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid";
 import { decrypt, encrypt } from "./crypt";
+import { randomStarName, randomWord } from "./starnames";
 export interface GameOptions {
   name: string;
   /** automatically create a new similar game each time this one fills */
@@ -87,10 +88,13 @@ export type GameAction =
   | PostChat;
 
 export type Position = [number, number, number];
+export type StarClass = "O" | "B" | "A" | "F" | "G" | "K" | "M";
+
 export interface Star {
   type: "star";
-  starClass: "M";
+  starClass: StarClass;
   position: Position;
+  name: string;
 }
 function generateUniverse(): Star[] {
   function getPoint(): Position {
@@ -126,7 +130,9 @@ function generateUniverse(): Star[] {
   ];
 
   function makeStar(position: Position): Star {
-    return { type: "star", starClass: "M", position };
+    const name = randomStarName();
+    const starClass: StarClass = randomWord(["O", "A", "G", "M"]) as StarClass;
+    return { type: "star", starClass, position, name };
   }
 
   const stars: Star[] = [];

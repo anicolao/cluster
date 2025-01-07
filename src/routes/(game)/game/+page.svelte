@@ -79,7 +79,9 @@ function processNewObject(key: string, objectId: string, newObject: any) {
     if (starIds[objectId] === undefined) {
       starIds[objectId] = star;
       stars.push(star);
-      console.log(`#stars ${stars.length}`);
+      console.log(
+        `#stars ${stars.length} ${star.name} is class ${star.starClass}`,
+      );
     }
   }
 }

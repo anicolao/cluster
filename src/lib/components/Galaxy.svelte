@@ -2,8 +2,8 @@
 import type { Position, Star } from "$common/gamestate";
 import { T, useFrame } from "@threlte/core";
 import {
-  FakeGlowMaterial,
   Float,
+  HTML,
   OrbitControls,
   Stars,
   interactivity,
@@ -11,8 +11,6 @@ import {
 import { linear } from "svelte/easing";
 import { tweened } from "svelte/motion";
 import { type PerspectiveCamera, Quaternion, Vector3 } from "three";
-import coronaFragmentShader from "./corona-fragment-shader.glsl?raw";
-import coronaVertexShader from "./corona-vertex-shader.glsl?raw";
 import vertexShader from "./dynamic-vertex-shader.glsl?raw";
 import fragmentShader from "./noise-grainy-fragment.glsl?raw";
 
@@ -29,6 +27,8 @@ useFrame(() => {
     shaderTime.set(1, { duration: 1000000 });
   }
   frameCount++;
+  // biome-ignore lint/correctness/noSelfAssign: trigger svelte to recalculate star name positions
+  cameraRef = cameraRef;
 });
 
 const cameraPosition: [number, number, number] = [0, 0, 20];
@@ -100,6 +100,11 @@ const typeToTemps = {
   M: { lowTemp: 500, highTemp: 3500 },
 };
 const type = "K";
+
+function vToPos(v: Vector3): Position {
+  const ret: Position = [v.x, v.y, v.z];
+  return ret;
+}
 </script>
 
 <Stars />
@@ -136,7 +141,10 @@ const type = "K";
     lastStar === i ? 0x00ee00 : starColor[i] ? starColor[i] : defaultStarColor
     }
   {@const position = star.position}
+  {@const tPosition = cameraRef?.localToWorld(cameraRef?.worldToLocal(new Vector3(...position)).add(new Vector3(0, -0.08, 0))) || new Vector3(...position)}
+  {@const textPosition = vToPos(tPosition)}
   <Float floatIntensity={0.2} >
+        <HTML position={textPosition} center pointerEvents="none"><div style="text-align: center; width: 12em">{star.name}</div></HTML>
     <T.Mesh
       {position}
       on:click={routeClick(i)}

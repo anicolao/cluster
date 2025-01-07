@@ -486,9 +486,81 @@ const stars = [
   "Zubenelgenubi",
   "Zubenelhakrabi",
   "Zubeneschamali",
+].map((x) => x.toLowerCase());
+const kPrefixes = [
+  "alpha",
+  "ancient",
+  "beta",
+  "chi",
+  "delta",
+  "epsilon",
+  "eta",
+  "fast",
+  "friendly",
+  "gamma",
+  "golden",
+  "iota",
+  "kappa",
+  "lambda",
+  "mu",
+  "nu",
+  "omega",
+  "omicron",
+  "peaceful",
+  "phi",
+  "pi",
+  "psi",
+  "rho",
+  "sigma",
+  "silver",
+  "strong",
+  "tau",
+  "theta",
+  "upsilon",
+  "watchful",
+  "xi",
+  "zeta",
+].map((x) => x.toLowerCase());
+const numerals = [
+  "I",
+  "II",
+  "III",
+  "IV",
+  "V",
+  "VI",
+  "VII",
+  "VIII",
+  "IX",
+  "X",
+  "XI",
+  "XII",
+  "XIII",
+  "XIV",
 ];
+const romanLetters = ["A", "B", "C", "D", "E"];
+const suffixes = ["Prime", "Minor"];
 
+export function randomWord(a: string[]) {
+  return a[Math.floor(Math.random() * a.length)];
+}
 export function randomStarName() {
-  const randomWord = (a: string[]) => a[Math.floor(Math.random() * a.length)];
-  return randomWord(stars);
+  const up = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  const randomUppercased = (a: string[]) => up(randomWord(a));
+  const prefix = randomUppercased(kPrefixes);
+  const starName = randomUppercased(stars);
+  const romanNumeral = randomUppercased(numerals);
+  const letter = randomUppercased(romanLetters);
+  const suffix = randomUppercased(suffixes);
+  const form = Math.random();
+  const name =
+    form < 0.05
+      ? `${starName}`
+      : form < 0.6
+        ? `${prefix} ${starName}`
+        : form < 0.8
+          ? `${starName} ${romanNumeral}`
+          : form < 0.95
+            ? `${starName} ${letter} ${romanNumeral}`
+            : `${starName} ${suffix}`;
+  return name;
 }
