@@ -105,6 +105,7 @@ function vToPos(v: Vector3): Position {
   const ret: Position = [v.x, v.y, v.z];
   return ret;
 }
+const isHighlighted = (i: number) => starColor[i] === 0xffea00;
 </script>
 
 <Stars />
@@ -143,15 +144,19 @@ function vToPos(v: Vector3): Position {
   {@const position = star.position}
   {@const tPosition = cameraRef?.localToWorld(cameraRef?.worldToLocal(new Vector3(...position)).add(new Vector3(0, -0.08, 0))) || new Vector3(...position)}
   {@const textPosition = vToPos(tPosition)}
+  {@const distance = Math.trunc(cameraRef?.position?.distanceTo(new Vector3(...position))*100)/100}
+  {@const scale = Math.max(2/Math.sqrt(distance), 0.8)}
   <Float floatIntensity={0.2} >
-        <HTML position={textPosition} center pointerEvents="none"><div style="text-align: center; width: 12em">{star.name}</div></HTML>
+  {#if distance <= 5 || isHighlighted(i)}
+    <HTML position={textPosition} center pointerEvents="none"><div style="text-align: center; width: 12em; scale: {scale}"><p>{star.name}</p><p>1/0/4/1</p><p><b>128</b></p></div></HTML>
+  {/if}
     <T.Mesh
       {position}
       on:click={routeClick(i)}
       on:pointerenter={starHilight(i)}
       on:pointerleave={starUnhilight(i)}
     >
-      <T.SphereGeometry args={[0.05, 32, 16]} />
+      <T.SphereGeometry args={[0.03, 32, 16]} />
       <T.ShaderMaterial
         {fragmentShader}
         {vertexShader}
@@ -212,6 +217,13 @@ function vToPos(v: Vector3): Position {
     rotation.x={Math.PI / 2}
   >
     <T.CylinderGeometry args={[0.001, 0.001, -position[2]]} />
-    <T.MeshBasicMaterial color="#666666" wireframe />
+    <T.MeshBasicMaterial color="#444444" wireframe />
   </T.Mesh>
 {/each}
+
+<style>
+p {
+  margin:0; 
+  padding: 0;
+}
+</style>
