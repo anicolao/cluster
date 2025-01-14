@@ -35,7 +35,6 @@ const cameraPosition: [number, number, number] = [0, 0, 20];
 let cameraRef: PerspectiveCamera;
 let route: number[] = [];
 let starColor: { [k: number]: number } = {};
-const defaultStarColor = 0xf85122;
 function starHilight(i: number) {
   return () => {
     starColor[i] = 0xffea00;
@@ -43,7 +42,7 @@ function starHilight(i: number) {
 }
 function starUnhilight(i: number) {
   return () => {
-    starColor[i] = defaultStarColor;
+    starColor[i] = colorFromType(stars[i]);
   };
 }
 function routeClick(i: number) {
@@ -52,7 +51,7 @@ function routeClick(i: number) {
     const closestColor = 0xffffff;
     for (const ck in starColor) {
       if (starColor[ck] === closestColor) {
-        starColor[ck] = defaultStarColor;
+        starColor[ck] = colorFromType(stars[ck]);
       }
     }
     const starDistances = stars
@@ -90,22 +89,22 @@ function midPoint(p0: Position, p1: Position): Position {
 }
 const shaderTime = tweened(0, { easing: linear });
 
-const typeToTemps = {
-  O: { lowTemp: 30000, highTemp: 100000 },
-  B: { lowTemp: 10000, highTemp: 30000 },
-  A: { lowTemp: 7500, highTemp: 10000 },
-  F: { lowTemp: 6500, highTemp: 7500 },
-  G: { lowTemp: 5000, highTemp: 6000 },
-  K: { lowTemp: 3500, highTemp: 5000 },
-  M: { lowTemp: 500, highTemp: 3500 },
-};
-const type = "K";
-
 function vToPos(v: Vector3): Position {
   const ret: Position = [v.x, v.y, v.z];
   return ret;
 }
 const isHighlighted = (i: number) => starColor[i] === 0xffea00;
+function colorFromType(s: Star) {
+  return {
+    O: 0x8080ff,
+    B: 0x8888ff,
+    A: 0xcccccc,
+    F: 0xffffe0,
+    G: 0xf0e68c,
+    K: 0xfaa500,
+    M: 0xff7f50,
+  }[s.starClass];
+}
 </script>
 
 <Stars />
@@ -139,7 +138,7 @@ const isHighlighted = (i: number) => starColor[i] === 0xffea00;
 {#each stars as star, i}
   {@const lastStar = route[route.length - 1]}
   {@const color =
-    lastStar === i ? 0x00ee00 : starColor[i] ? starColor[i] : defaultStarColor
+    lastStar === i ? 0x00ee00 : starColor[i] ? starColor[i] : colorFromType(star)
     }
   {@const position = star.position}
   {@const tPosition = cameraRef?.localToWorld(cameraRef?.worldToLocal(new Vector3(...position)).add(new Vector3(0, -0.08, 0))) || new Vector3(...position)}
