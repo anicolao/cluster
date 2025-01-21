@@ -95,7 +95,10 @@ export interface Star {
   starClass: StarClass;
   position: Position;
   name: string;
+  owner: string | "nobody";
 }
+export type HomeStar = Star & { homeStarIndex: number };
+
 function generateUniverse(): Star[] {
   function getPoint(): Position {
     const u = Math.random();
@@ -112,35 +115,28 @@ function generateUniverse(): Star[] {
     const z = r * cosPhi;
     return [x, y, z];
   }
-  const t = (1 + Math.sqrt(5)) / 2;
-
-  const homeStars: Position[] = [
-    [-1, t, 0],
-    [1, t, 0],
-    [-1, -t, 0],
-    [1, -t, 0],
-    [0, -1, t],
-    [0, 1, t],
-    [0, -1, -t],
-    [0, 1, -t],
-    [t, 0, -1],
-    [t, 0, 1],
-    [-t, 0, -1],
-    [-t, 0, 1],
-  ];
 
   function makeStar(position: Position): Star {
     const name = randomStarName();
     const starClass: StarClass = randomWord(["O", "A", "G", "M"]) as StarClass;
-    return { type: "star", starClass, position, name };
+    return { type: "star", starClass, position, name, owner: "nobody" };
+  }
+  function makeHomestar(position: Position, homeStarIndex: number): HomeStar {
+    const name = randomStarName();
+    const starClass: StarClass = randomWord(["O", "A", "G", "M"]) as StarClass;
+    return {
+      type: "star",
+      starClass,
+      position,
+      name,
+      homeStarIndex,
+      owner: "nobody",
+    };
   }
 
   const stars: Star[] = [];
-  const NEIGHBOURS = 15;
-  function makeNeighbourhood(homeStar: Position) {
-    // stars.push(makeStar(homeStar));
-
-    for (let i = 0; i < NEIGHBOURS; ++i) {
+  function makeNeighbourhood(homeStar: Position, n: number) {
+    for (let i = 0; i < n; ++i) {
       const star = getPoint();
       let scaleFactor = 0.1;
       if (scaleFactor < 0) scaleFactor = 0.0001;
@@ -154,29 +150,7 @@ function generateUniverse(): Star[] {
     }
   }
 
-  /*
-  for (const homeStar of homeStars) {
-    makeNeighbourhood(homeStar);
-  }
-  */
-  function makeStarCircle() {
-    const nStars = 48;
-    const angle = (2 * Math.PI) / nStars;
-    for (let i = 0; i < nStars; ++i) {
-      const theta = i * angle;
-      const r = 1;
-
-      const x = r * Math.cos(theta);
-      const y = r * Math.sin(theta);
-      const z = 0;
-      const position = [x, y, z] as Position;
-
-      stars.push(makeStar(position));
-    }
-  }
   function makeSpiralArm() {
-    const nStars = 48;
-
     // A = scale parameter for entire structure
     // B, N determine the spiral pitch
     // r = A / ( log(B * tan(theta/(2*N)) ) )
@@ -189,13 +163,16 @@ function generateUniverse(): Star[] {
       return A / Math.log(B * Math.tan(theta / (2 * N)));
     }
 
-    const A = 0.5;
-    const N = 3;
-    const B = 0.5;
-    const NUM_PLAYERS = 5;
+    const N = 8;
+    const B = 1.4;
+    const A = 3 / Math.abs(R(2 * Math.PI, 1, B, N));
+    const NUM_PLAYERS = 2;
+    const numSteps = 32;
+    const truncation = 6;
+    const midPoint = truncation + Math.trunc((numSteps - truncation) / 2);
     for (let j = 0; j < NUM_PLAYERS; ++j) {
-      for (let i = 0; i < nStars; ++i) {
-        const theta = ((2 * Math.PI) / nStars) * i;
+      for (let i = truncation; i < numSteps; ++i) {
+        const theta = 2 * Math.PI * (1 - (i * i) / (numSteps * numSteps));
         const r = R(theta, A, B, N);
 
         const x = r * Math.cos(theta + ((2 * Math.PI) / NUM_PLAYERS) * j);
@@ -203,9 +180,13 @@ function generateUniverse(): Star[] {
         const z = 0;
         const position = [x, y, z] as Position;
 
-        stars.push(makeStar(position));
+        makeNeighbourhood(position, 3);
+        if (i === midPoint) {
+          stars.push(makeHomestar(position, j));
+        }
       }
     }
+    makeNeighbourhood([0, 0, 0] as Position, 6);
   }
   makeSpiralArm();
   return stars;
@@ -257,6 +238,8 @@ export function game(
       nextstate.options.playersNeeded -= 1;
     }
     nextstate.keys = { ...nextstate.keys };
+    nextstate.objects = { ...nextstate.objects };
+    let assignedHomestar = false;
     for (const objectId in gamestate.objects) {
       if (nextstate.keys[objectId]) {
         nextstate.keys[objectId] = { ...nextstate.keys[objectId] };
@@ -266,6 +249,21 @@ export function game(
       const starKey = decrypt(gamekey, nextstate.keys[objectId].key);
       if (starKey !== null) {
         nextstate.keys[objectId][uid] = encrypt(privateKey, starKey);
+        if (!assignedHomestar) {
+          // assign the next available homestar to this user
+          const starJSON = decrypt(starKey, nextstate.objects[objectId]);
+          if (starJSON !== null) {
+            const star = JSON.parse(starJSON);
+            if (star.homeStarIndex !== undefined && star.owner === "nobody") {
+              assignedHomestar = true;
+              star.owner = uid;
+              nextstate.objects[objectId] = encrypt(
+                starKey,
+                JSON.stringify(star),
+              );
+            }
+          }
+        }
       }
     }
   } else if (action.type === "leave_game") {

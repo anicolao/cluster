@@ -141,13 +141,15 @@ function colorFromType(s: Star) {
     lastStar === i ? 0x00ee00 : starColor[i] ? starColor[i] : colorFromType(star)
     }
   {@const position = star.position}
+  {@const size = star.homeStarIndex !== undefined ? 0.1 : 0.03}
+  {@const owner = star.owner}
   {@const tPosition = cameraRef?.localToWorld(cameraRef?.worldToLocal(new Vector3(...position)).add(new Vector3(0, -0.08, 0))) || new Vector3(...position)}
   {@const textPosition = vToPos(tPosition)}
   {@const distance = Math.trunc(cameraRef?.position?.distanceTo(new Vector3(...position))*100)/100}
   {@const scale = Math.max(2/Math.sqrt(distance), 0.8)}
   <Float floatIntensity={0.2} >
   {#if distance <= 5 || isHighlighted(i)}
-    <HTML position={textPosition} center pointerEvents="none"><div style="text-align: center; width: 12em; scale: {scale}"><p>{star.name}</p><p>1/0/4/1</p><p><b>128</b></p></div></HTML>
+    <HTML position={textPosition} center pointerEvents="none"><div style="text-align: center; width: 12em; scale: {scale}"><p>{star.name}</p><p>1/0/4/1</p><p><b>{owner}</b></p></div></HTML>
   {/if}
     <T.Mesh
       {position}
@@ -155,7 +157,7 @@ function colorFromType(s: Star) {
       on:pointerenter={starHilight(i)}
       on:pointerleave={starUnhilight(i)}
     >
-      <T.SphereGeometry args={[0.03, 32, 16]} />
+      <T.SphereGeometry args={[size, 32, 16]} />
       <T.ShaderMaterial
         {fragmentShader}
         {vertexShader}

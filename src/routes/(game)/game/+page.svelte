@@ -33,7 +33,8 @@ let gameState: GameState = {} as GameState;
 const chatRooms: { [k: string]: ChatRoom } = {};
 let lastTimeStamp = 0;
 
-const stars: Star[] = [];
+let stars: Star[] = [];
+const previouslyDecrypted: { [k: string]: boolean } = {};
 const starIds: { [k: string]: Star } = {};
 
 // biome-ignore lint/suspicious/noExplicitAny: data came from firebase, no type
@@ -80,7 +81,16 @@ function processNewObject(key: string, objectId: string, newObject: any) {
       starIds[objectId] = star;
       stars.push(star);
       console.log(
-        `#stars ${stars.length} ${star.name} is class ${star.starClass}`,
+        `#stars ${stars.length} ${star.name} is class ${star.starClass} owner ${star.owner}`,
+      );
+    } else {
+      starIds[objectId] = star;
+      stars = [];
+      for (const sk in starIds) {
+        stars.push(starIds[sk]);
+      }
+      console.log(
+        `updated star ${star.name} is class ${star.starClass} owner ${star.owner}`,
       );
     }
   }
@@ -122,7 +132,13 @@ function subscribeToGamePatches() {
                     const newObject = JSON.parse(
                       decrypt(key, gameState.objects[objectId]) || "{}",
                     );
-                    processNewObject(key, objectId, newObject);
+                    if (
+                      patchData?.objects[objectId] ||
+                      !previouslyDecrypted[objectId]
+                    ) {
+                      processNewObject(key, objectId, newObject);
+                      previouslyDecrypted[objectId] = true;
+                    }
                   }
                 }
               }
