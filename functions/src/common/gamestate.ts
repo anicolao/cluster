@@ -138,7 +138,7 @@ function generateUniverse(): Star[] {
   const stars: Star[] = [];
   const NEIGHBOURS = 15;
   function makeNeighbourhood(homeStar: Position) {
-    //stars.push(homeStar);
+    // stars.push(makeStar(homeStar));
 
     for (let i = 0; i < NEIGHBOURS; ++i) {
       const star = getPoint();
@@ -154,9 +154,60 @@ function generateUniverse(): Star[] {
     }
   }
 
+  /*
   for (const homeStar of homeStars) {
     makeNeighbourhood(homeStar);
   }
+  */
+  function makeStarCircle() {
+    const nStars = 48;
+    const angle = (2 * Math.PI) / nStars;
+    for (let i = 0; i < nStars; ++i) {
+      const theta = i * angle;
+      const r = 1;
+
+      const x = r * Math.cos(theta);
+      const y = r * Math.sin(theta);
+      const z = 0;
+      const position = [x, y, z] as Position;
+
+      stars.push(makeStar(position));
+    }
+  }
+  function makeSpiralArm() {
+    const nStars = 48;
+
+    // A = scale parameter for entire structure
+    // B, N determine the spiral pitch
+    // r = A / ( log(B * tan(theta/(2*N)) ) )
+    //
+    // examples: N = 8, B = 0.05
+    // examples: N = 4, B = 0.5
+    // examples: N = 4, B = 1
+
+    function R(theta: number, A: number, B: number, N: number) {
+      return A / Math.log(B * Math.tan(theta / (2 * N)));
+    }
+
+    const A = 0.5;
+    const N = 3;
+    const B = 0.5;
+    const NUM_PLAYERS = 5;
+    for (let j = 0; j < NUM_PLAYERS; ++j) {
+      for (let i = 0; i < nStars; ++i) {
+        const theta = ((2 * Math.PI) / nStars) * i;
+        const r = R(theta, A, B, N);
+
+        const x = r * Math.cos(theta + ((2 * Math.PI) / NUM_PLAYERS) * j);
+        const y = r * Math.sin(theta + ((2 * Math.PI) / NUM_PLAYERS) * j);
+        const z = 0;
+        const position = [x, y, z] as Position;
+
+        stars.push(makeStar(position));
+      }
+    }
+  }
+  makeSpiralArm();
   return stars;
 }
 export function initialGameState(
