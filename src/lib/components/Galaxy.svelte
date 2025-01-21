@@ -17,7 +17,7 @@ import fragmentShader from "./noise-grainy-fragment.glsl?raw";
 interactivity();
 
 // biome-ignore lint/style/useConst: Svelte parameter.
-export let stars: Star[] = [];
+export let starIds: { [k: string]: Star } = {};
 
 let frameCount = 0;
 
@@ -33,33 +33,35 @@ useFrame(() => {
 
 const cameraPosition: [number, number, number] = [0, 0, 20];
 let cameraRef: PerspectiveCamera;
-let route: number[] = [];
-let starColor: { [k: number]: number } = {};
-function starHilight(i: number) {
+let route: string[] = [];
+let starColor: { [k: string]: number } = {};
+function starHilight(id: string) {
   return () => {
-    starColor[i] = 0xffea00;
+    starColor[id] = 0xffea00;
   };
 }
-function starUnhilight(i: number) {
+function starUnhilight(id: string) {
   return () => {
-    starColor[i] = colorFromType(stars[i]);
+    starColor[id] = colorFromType(starIds[id]);
   };
 }
-function routeClick(i: number) {
+function routeClick(id: string) {
   return () => {
-    route.push(i);
+    route.push(id);
     const closestColor = 0xffffff;
     for (const ck in starColor) {
       if (starColor[ck] === closestColor) {
-        starColor[ck] = colorFromType(stars[ck]);
+        starColor[ck] = colorFromType(starIds[ck]);
       }
     }
+    /*
     const starDistances = stars
       .map((p, j) => [dist(p.position, stars[i].position), j])
       .sort((a, b) => a[0] - b[0]);
     for (let i = 1; i < 4; ++i) {
       starColor[starDistances[i][1]] = 0xffffff;
     }
+    */
     // biome-ignore lint/correctness/noSelfAssign: Threlte-reactivity
     starColor = starColor;
     // biome-ignore lint/correctness/noSelfAssign: Threlte-reactivity
@@ -68,12 +70,6 @@ function routeClick(i: number) {
     return;
   };
 }
-
-const aStar = Math.trunc(Math.random() * stars.length);
-const bStar = Math.trunc(Math.random() * stars.length);
-starColor[aStar] = 0x0000ff;
-starColor[bStar] = 0x00ff00;
-console.log("aStar", aStar);
 
 const radii = [0.5, 1, 1.5, 2, 2.5, 3];
 
@@ -93,7 +89,7 @@ function vToPos(v: Vector3): Position {
   const ret: Position = [v.x, v.y, v.z];
   return ret;
 }
-const isHighlighted = (i: number) => starColor[i] === 0xffea00;
+const isHighlighted = (id: string) => starColor[id] === 0xffea00;
 function colorFromType(s: Star) {
   return {
     O: 0x8080ff,
@@ -135,10 +131,11 @@ function colorFromType(s: Star) {
 <T.DirectionalLight intensity={0.8} position.x={5} position.y={10} />
 <T.AmbientLight intensity={0.4} />
 
-{#each stars as star, i}
+{#each Object.keys(starIds) as starId, i}
+  {@const star = starIds[starId]}
   {@const lastStar = route[route.length - 1]}
   {@const color =
-    lastStar === i ? 0x00ee00 : starColor[i] ? starColor[i] : colorFromType(star)
+    lastStar === starId ? 0x00ee00 : starColor[starId] ? starColor[starId] : colorFromType(star)
     }
   {@const position = star.position}
   {@const size = star.homeStarIndex !== undefined ? 0.1 : 0.03}
@@ -148,14 +145,20 @@ function colorFromType(s: Star) {
   {@const distance = Math.trunc(cameraRef?.position?.distanceTo(new Vector3(...position))*100)/100}
   {@const scale = Math.max(2/Math.sqrt(distance), 0.8)}
   <Float floatIntensity={0.2} >
-  {#if distance <= 5 || isHighlighted(i)}
-    <HTML position={textPosition} center pointerEvents="none"><div style="text-align: center; width: 12em; scale: {scale}"><p>{star.name}</p><p>1/0/4/1</p><p><b>{owner}</b></p></div></HTML>
+  {#if distance <= 5 || isHighlighted(starId)}
+    <HTML position={textPosition} center pointerEvents="none">
+        <div style="text-align: center; width: 12em; scale: {scale}">
+          <p>{star.name}</p>
+          <p>1/0/4/1</p>
+          <p><b>{owner}</b></p>
+        </div>
+    </HTML>
   {/if}
     <T.Mesh
       {position}
-      on:click={routeClick(i)}
-      on:pointerenter={starHilight(i)}
-      on:pointerleave={starUnhilight(i)}
+      on:click={routeClick(starId)}
+      on:pointerenter={starHilight(starId)}
+      on:pointerleave={starUnhilight(starId)}
     >
       <T.SphereGeometry args={[size, 32, 16]} />
       <T.ShaderMaterial
@@ -178,18 +181,18 @@ function colorFromType(s: Star) {
         uniforms.time.value={i + $shaderTime}
         uniforms.highColor.value={color}
       />
-      {#if lastStar === i}
+      {#if lastStar === starId}
         <T.PointLight args={["#00ff00", 0]} />
       {/if}
     </T.Mesh>
   </Float>
 {/each}
 <!-- Draw route between stars -->
-{#each route as starIndex, i}
+{#each route as starId, i}
   {#if i > 0}
-    {@const priorIndex = route[i - 1]}
-    {@const position = stars[starIndex].position}
-    {@const prior = stars[priorIndex].position}
+    {@const priorId = route[i - 1]}
+    {@const position = starIds[starId].position}
+    {@const prior = starIds[priorId].position}
     {@const origin = midPoint(position, prior)}
     {@const v0 = new Vector3(...position)}
     {@const v1 = new Vector3(...prior)}
@@ -211,7 +214,8 @@ function colorFromType(s: Star) {
 {/each}
 
 <!-- Projection to Galactic Plane -->
-{#each stars as star}
+{#each Object.keys(starIds) as starId}
+  {@const star = starIds[starId]}
   {@const position = star.position}
   <T.Mesh
     position={[position[0], position[1], position[2] / 2]}

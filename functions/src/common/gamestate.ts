@@ -99,6 +99,15 @@ export interface Star {
 }
 export type HomeStar = Star & { homeStarIndex: number };
 
+export interface Developments {
+  type: "developments";
+  starId: string;
+  markets: number;
+  bases: number;
+  camps: number;
+  stations: number;
+}
+
 function generateUniverse(): Star[] {
   function getPoint(): Position {
     const u = Math.random();
@@ -246,21 +255,45 @@ export function game(
       } else {
         continue;
       }
-      const starKey = decrypt(gamekey, nextstate.keys[objectId].key);
-      if (starKey !== null) {
-        nextstate.keys[objectId][uid] = encrypt(privateKey, starKey);
-        if (!assignedHomestar) {
-          // assign the next available homestar to this user
-          const starJSON = decrypt(starKey, nextstate.objects[objectId]);
-          if (starJSON !== null) {
-            const star = JSON.parse(starJSON);
-            if (star.homeStarIndex !== undefined && star.owner === "nobody") {
-              assignedHomestar = true;
-              star.owner = uid;
-              nextstate.objects[objectId] = encrypt(
-                starKey,
-                JSON.stringify(star),
-              );
+      const objectKey = decrypt(gamekey, nextstate.keys[objectId].key);
+      if (objectKey !== null) {
+        // assign the next available homestar to this user
+        const objectJSON = decrypt(objectKey, nextstate.objects[objectId]);
+        if (objectJSON !== null) {
+          const star = JSON.parse(objectJSON);
+          if (star.type === "star") {
+            nextstate.keys[objectId][uid] = encrypt(privateKey, objectKey);
+            if (!assignedHomestar) {
+              if (star.homeStarIndex !== undefined && star.owner === "nobody") {
+                assignedHomestar = true;
+                star.owner = uid;
+                nextstate.objects[objectId] = encrypt(
+                  objectKey,
+                  JSON.stringify(star),
+                );
+                // assign default developments to the homestar
+                const developmentId = uuid();
+                const developmentKey = "d";
+                const defaultDevelopments: Developments = {
+                  type: "developments",
+                  starId: objectId,
+                  markets: 0,
+                  bases: 1,
+                  camps: 1,
+                  stations: 0,
+                };
+                nextstate.objects[developmentId] = encrypt(
+                  developmentKey,
+                  JSON.stringify(defaultDevelopments),
+                );
+                nextstate.keys[developmentId] = {
+                  key: encrypt(gamekey, developmentKey),
+                };
+                nextstate.keys[developmentId][uid] = encrypt(
+                  privateKey,
+                  developmentKey,
+                );
+              }
             }
           }
         }

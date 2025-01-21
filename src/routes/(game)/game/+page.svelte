@@ -80,9 +80,6 @@ function processNewObject(key: string, objectId: string, newObject: any) {
     if (starIds[objectId] === undefined) {
       starIds[objectId] = star;
       stars.push(star);
-      console.log(
-        `#stars ${stars.length} ${star.name} is class ${star.starClass} owner ${star.owner}`,
-      );
     } else {
       starIds[objectId] = star;
       stars = [];
@@ -93,6 +90,8 @@ function processNewObject(key: string, objectId: string, newObject: any) {
         `updated star ${star.name} is class ${star.starClass} owner ${star.owner}`,
       );
     }
+  } else if (newObject.type === "developments") {
+    console.log("Developments: ", newObject);
   }
 }
 function subscribeToGamePatches() {
@@ -344,7 +343,7 @@ function closeTab(_: Event) {
         </div>
       </div>
       <Canvas>
-        <Galaxy {stars} />
+        <Galaxy {starIds} />
       </Canvas>
   </div>
     <!--
