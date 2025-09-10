@@ -33,7 +33,7 @@ Cluster is an obsessive slow real-time strategy game where players compete to do
 ### Development Tools
 - **Linting/Formatting**: Biome (replaces ESLint + Prettier)
 - **Testing**: Vitest with coverage reporting
-- **Package Manager**: npm (with bun.lockb for compatibility)
+- **Package Manager**: bun
 - **Git Hooks**: Husky for pre-commit checks
 - **CI/CD**: Firebase deployment with automated checks
 
@@ -97,15 +97,15 @@ functions/src/
 ## Development Workflow
 
 ### Getting Started
-1. Install dependencies: `npm install`
+1. Install dependencies: `bun i`
 2. Start Firebase emulators: `firebase emulators:start`
-3. Run development server: `npm run dev`
-4. Run tests: `npm test`
+3. Run development server: `bun run dev`
+4. Run tests: `bun test`
 
 ### Code Quality
-- **Linting**: `npm run lint` (Biome)
-- **Formatting**: `npm run format` (Biome)
-- **Type Checking**: `npm run check` (Svelte + TypeScript)
+- **Linting**: `bun run lint` (Biome)
+- **Formatting**: `bun run format` (Biome)
+- **Type Checking**: `bun run check` (Svelte + TypeScript)
 
 ### Testing Strategy
 - **Unit Tests**: Vitest for business logic
@@ -116,8 +116,8 @@ functions/src/
   - Functions: `functions/tests/**/*.test.ts`
 
 ### Deployment
-- **Build**: `npm run build`
-- **Deploy**: `npm run deploy` (Firebase hosting + functions)
+- **Build**: `bun run build`
+- **Deploy**: `bun run deploy` (Firebase hosting + functions)
 - **Environment**: Firebase project configuration
 
 ## Coding Conventions
