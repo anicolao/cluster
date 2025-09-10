@@ -47,13 +47,9 @@ Cluster follows a modern web application architecture pattern with:
 
 ### 2. Backend Components
 - **[Game Logic Functions](./backend-game-functions.md)**: Core game mechanics and action processing
-- **[Profile Management](./backend-profile-functions.md)**: User profile and authentication handling
-- **[Metagame Functions](./backend-metagame-functions.md)**: Game lifecycle management (creation, deletion, scheduling)
 
 ### 3. Shared Components
 - **[Data Models](./shared-data-models.md)**: TypeScript interfaces and types shared between frontend and backend
-- **[Game State Management](./shared-game-state.md)**: Game logic and state transition functions
-- **[Common Utilities](./shared-utilities.md)**: Shared helper functions and constants
 
 ### 4. Infrastructure
 - **[Database Design](./infrastructure-database.md)**: Firestore and Realtime Database schema and access patterns
