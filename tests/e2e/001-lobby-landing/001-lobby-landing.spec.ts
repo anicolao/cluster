@@ -27,6 +27,28 @@ test.describe("Lobby", () => {
       ],
     });
 
+    await page.getByRole("link", { name: "lobby" }).click();
+
+    await helper.step("lobby_signin_prompt", {
+      description: "Lobby page shows sign-in prompt when not authenticated",
+      verifications: [
+        {
+          spec: "Sign-in message is visible",
+          check: async () => {
+            await expect(page.getByText("Please sign in.")).toBeVisible();
+          },
+        },
+        {
+          spec: "Sign-in button is visible",
+          check: async () => {
+            await expect(
+              page.getByRole("button", { name: /Sign in/i }),
+            ).toBeVisible();
+          },
+        },
+      ],
+    });
+
     helper.generateDocs();
   });
 });

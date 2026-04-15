@@ -17,7 +17,6 @@ import { onDestroy, onMount } from "svelte";
 
 let unsubscribeFromGamePatches: Unsubscribe | undefined;
 
-// biome-ignore lint/suspicious/noConfusingLabels: svelte label
 $: gameId = $page.url.searchParams.get("id");
 
 let gameState: GameState = {} as GameState;
