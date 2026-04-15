@@ -1,5 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "@firebase/app";
+import { connectAuthEmulator, getAuth } from "@firebase/auth";
 import { connectDatabaseEmulator, getDatabase } from "@firebase/database";
 import { connectFirestoreEmulator, getFirestore } from "@firebase/firestore";
 //import { getAnalytics } from "firebase/analytics";
@@ -29,4 +30,5 @@ if (!import.meta.env.PROD) {
   // Use local emulators.
   connectFirestoreEmulator(firestore, "localhost", 8080);
   connectDatabaseEmulator(realtimeDB, "localhost", 9000);
+  connectAuthEmulator(getAuth(), "http://localhost:9099");
 }

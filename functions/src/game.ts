@@ -97,6 +97,7 @@ export async function updateGames() {
           playerCount: gameOptions.playerCount,
           playersNeeded: gameOptions.playerCount,
           players: {},
+          started: false,
         });
       }
     }

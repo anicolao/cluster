@@ -33,6 +33,7 @@
     "lint:fix": "biome check --apply src tests",
     "prepare": "husky install",
     "ci": "biome ci src tests",
+    "test:e2e": "firebase emulators:exec 'npx playwright test'",
     "postversion": "./bin/packagedist",
     "deploy": "bun run build && firebase deploy --only hosting,firestore"
   },
@@ -52,6 +53,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.7.1",
+    "@playwright/test": "^1.59.1",
     "@sveltejs/adapter-static": "^3.0.1",
     "@sveltejs/kit": "^2.5.7",
     "@sveltejs/package": "^2.3.1",
