@@ -56,9 +56,10 @@ export class TestStepHelper {
     await expect(this.page).toHaveScreenshot(filename);
 
     // 3. Track for documentation
+    const projectSlug = this.testInfo.project.name.replace(/\s+/g, "-");
     this.steps.push({
       title: options.description,
-      image: `./screenshots/${filename}`, // Path relative to README.md
+      image: `./screenshots/${projectSlug}/${filename}`, // Path relative to README.md
       specs: options.verifications.map((v) => v.spec),
     });
   }

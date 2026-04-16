@@ -21,9 +21,6 @@ Cluster is a slow-real-time space conquest game designed for long-term play. It 
 ### Game Logic
 The game follows a tick-based system. Each tick updates the state of the universe based on player actions and automated processes. State is managed via `@ourway/patch`, allowing for efficient synchronization between the server and clients by sending only the changes rather than the full state.
 
-### Coordination Layer
-The `.conductor` directory contains the orchestration logic for the project's development lifecycle. It uses LLM-based agents to manage issues, coordinate feature implementation, and ensure quality through automated verification and E2E testing.
-
 ## Testing Strategy
 
 ### E2E Testing (Playwright)

@@ -4,7 +4,7 @@ Verify the initial landing page of Cluster.
 
 ## Landing page with Cluster title
 
-![Landing page with Cluster title](./screenshots/000-landing-page.png)
+![Landing page with Cluster title](./screenshots/Mobile-Chrome/000-landing-page.png)
 
 ### Verifications
 - [x] Heading 'Cluster' is visible
@@ -13,7 +13,7 @@ Verify the initial landing page of Cluster.
 
 ## Lobby page shows sign-in prompt when not authenticated
 
-![Lobby page shows sign-in prompt when not authenticated](./screenshots/001-lobby-signin-prompt.png)
+![Lobby page shows sign-in prompt when not authenticated](./screenshots/Mobile-Chrome/001-lobby-signin-prompt.png)
 
 ### Verifications
 - [x] Sign-in message is visible

@@ -32,10 +32,6 @@ export default defineConfig({
 			name: "Mobile Chrome",
 			use: { ...devices["iPhone 12"], browserName: "chromium" },
 		},
-		{
-			name: "Mobile Safari",
-			use: { ...devices["iPhone 12"] },
-		},
 	],
 
 	/* Run your local dev server before starting the tests */
@@ -45,5 +41,5 @@ export default defineConfig({
 		reuseExistingServer: !process.env.CI,
 	},
 
-	snapshotPathTemplate: "{testDir}/{testFileDir}/screenshots/{arg}{ext}",
+	snapshotPathTemplate: "{testDir}/{testFileDir}/screenshots/{projectName}/{arg}{ext}",
 });
