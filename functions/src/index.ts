@@ -1,5 +1,5 @@
-import type { GameAction } from "$common/gamestate";
-import type { MetaGameAction } from "$common/metagame";
+import type { GameAction } from "./common/gamestate";
+import type { MetaGameAction } from "./common/metagame";
 import * as admin from "firebase-admin";
 import { onSchedule } from "firebase-functions/scheduler";
 import { onValueCreated } from "firebase-functions/v2/database";

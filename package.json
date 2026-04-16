@@ -74,7 +74,10 @@
   "types": "./dist/index.d.ts",
   "type": "module",
   "dependencies": {
+    "@firebase/app": "^0.14.11",
+    "@firebase/auth": "^1.13.0",
     "@firebase/database": "^1.0.5",
+    "@firebase/firestore": "^4.14.0",
     "@ourway/firestore-redux": "^0.0.1",
     "@ourway/patch": "^0.1.2",
     "@ourway/svelte-firebase-auth": "^0.0.4",

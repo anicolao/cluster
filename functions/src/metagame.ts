@@ -1,4 +1,4 @@
-import type { GameOptions } from "$common/gamestate";
+import type { GameOptions } from "./common/gamestate";
 import * as admin from "firebase-admin";
 
 export async function createGame(options: GameOptions) {
