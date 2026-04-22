@@ -1,5 +1,5 @@
-import { randomName } from "../../src/common/gamenames.ts";
 import { describe, expect, it } from "vitest";
+import { randomName } from "../../src/common/gamenames.ts";
 
 describe("gamename tests", () => {
   it("generates a name", () => {

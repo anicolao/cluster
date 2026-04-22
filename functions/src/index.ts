@@ -1,8 +1,8 @@
-import type { GameAction } from "./common/gamestate";
-import type { MetaGameAction } from "./common/metagame";
 import * as admin from "firebase-admin";
 import { onSchedule } from "firebase-functions/scheduler";
 import { onValueCreated } from "firebase-functions/v2/database";
+import type { GameAction } from "./common/gamestate";
+import type { MetaGameAction } from "./common/metagame";
 import { executeGameAction, updateGames } from "./game";
 import { createGame, deleteGame } from "./metagame";
 import { processProfileAction } from "./profile";
