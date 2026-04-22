@@ -1,23 +1,25 @@
 {
-  "$schema": "./node_modules/rome/configuration_schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "files": {
+    "ignoreUnknown": true
+  },
   "formatter": {
     "enabled": true,
     "formatWithErrors": false,
     "indentStyle": "space",
     "indentWidth": 2,
-    "lineWidth": 80,
-    "ignore": []
+    "lineWidth": 80
   },
   "linter": {
     "enabled": true,
     "rules": {
       "recommended": true,
       "style": {
-      	"noUnusedTemplateLiteral": "off"
-			},
-			"performance": {
-				"noDelete": "off"
-			}
+        "noUnusedTemplateLiteral": "off"
+      },
+      "performance": {
+        "noDelete": "off"
+      }
     }
   }
 }

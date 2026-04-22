@@ -30,9 +30,11 @@
     "test:watch": "vitest watch --coverage",
     "format": "biome format --write src tests",
     "lint": "biome check src tests",
-    "lint:fix": "biome check --apply src tests",
+    "lint:fix": "biome check --write src tests",
     "prepare": "husky install",
     "ci": "biome ci src tests",
+    "pretest:e2e": "npm run build && npm --prefix functions run build",
+    "test:e2e": "firebase emulators:exec 'npx playwright test'",
     "postversion": "./bin/packagedist",
     "deploy": "bun run build && firebase deploy --only hosting,firestore"
   },
@@ -51,7 +53,8 @@
     "svelte": "^4.0.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.7.1",
+    "@biomejs/biome": "1.9.4",
+    "@playwright/test": "^1.59.1",
     "@sveltejs/adapter-static": "^3.0.1",
     "@sveltejs/kit": "^2.5.7",
     "@sveltejs/package": "^2.3.1",
@@ -72,7 +75,10 @@
   "types": "./dist/index.d.ts",
   "type": "module",
   "dependencies": {
+    "@firebase/app": "^0.14.11",
+    "@firebase/auth": "^1.13.0",
     "@firebase/database": "^1.0.5",
+    "@firebase/firestore": "^4.14.0",
     "@ourway/firestore-redux": "^0.0.1",
     "@ourway/patch": "^0.1.2",
     "@ourway/svelte-firebase-auth": "^0.0.4",

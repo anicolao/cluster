@@ -58,6 +58,7 @@ function createGame() {
       autospawn,
       playerCount,
       playersNeeded: playerCount,
+      started: false,
       players: {},
     },
   };

@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-bun run ci
-bun test
+export npm_config_engine_strict=false
+npm run ci
+npm run test

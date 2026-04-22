@@ -1,5 +1,5 @@
-import { type Patch, diff, patch } from "@ourway/patch";
 import * as admin from "firebase-admin";
+import { randomName } from "./common/gamenames";
 import {
   type GameAction,
   type GameOptions,
@@ -7,7 +7,7 @@ import {
   game,
   initialGameState,
 } from "./common/gamestate";
-import { randomName } from "$common/gamenames";
+import { type Patch, diff, patch } from "./common/patch";
 import { createGame } from "./metagame";
 
 async function writePatch(gameid: string, p: Patch) {
@@ -97,6 +97,7 @@ export async function updateGames() {
           playerCount: gameOptions.playerCount,
           playersNeeded: gameOptions.playerCount,
           players: {},
+          started: false,
         });
       }
     }

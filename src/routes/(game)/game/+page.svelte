@@ -2,10 +2,10 @@
 import { goto } from "$app/navigation";
 import { page } from "$app/stores";
 import { type GameAction, type GameState, gameOver } from "$common/gamestate";
+import { patch } from "$common/patch";
 import { uid } from "$lib/auth";
 import { firestore, realtimeDB } from "$lib/firebase";
 import { push, ref } from "@firebase/database";
-import { patch } from "@ourway/patch";
 import {
   type Unsubscribe,
   collection,
@@ -17,7 +17,6 @@ import { onDestroy, onMount } from "svelte";
 
 let unsubscribeFromGamePatches: Unsubscribe | undefined;
 
-// biome-ignore lint/suspicious/noConfusingLabels: svelte label
 $: gameId = $page.url.searchParams.get("id");
 
 let gameState: GameState = {} as GameState;

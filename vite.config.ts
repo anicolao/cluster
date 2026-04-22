@@ -9,6 +9,7 @@ export default defineConfig({
   ],
   test: {
     include: ["tests/**/*.{test,spec}.{js,ts}"],
+    exclude: ["tests/e2e/**"],
     coverage: {
       exclude: [
         "build/**",

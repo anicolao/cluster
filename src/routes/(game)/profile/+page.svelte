@@ -36,8 +36,6 @@ function setNameTimeout() {
   }, WRITE_DELAY);
 }
 
-// biome-ignore lint/correctness/noUnusedLabels: no lint support for $
-// biome-ignore lint/suspicious/noConfusingLabels: no lint support for $
 $: if (alias) setNameTimeout();
 
 let unsubscribeProfiles: Unsubscribe | undefined;
