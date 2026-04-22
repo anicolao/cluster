@@ -33,6 +33,7 @@
     "lint:fix": "biome check --write src tests",
     "prepare": "husky install",
     "ci": "biome ci src tests",
+    "pretest:e2e": "npm run build && npm --prefix functions run build",
     "test:e2e": "firebase emulators:exec 'npx playwright test'",
     "postversion": "./bin/packagedist",
     "deploy": "bun run build && firebase deploy --only hosting,firestore"
